@@ -1,0 +1,130 @@
+﻿# Guia de Publicacion — Formulario de Evaluacion
+
+## Archivos del proyecto
+
+| Archivo              | Descripcion                                    |
+|----------------------|------------------------------------------------|
+| index.html           | Formulario de evaluacion (rubrica interactiva) |
+| resultados.html      | Dashboard con ranking y grafico de grupos      |
+| apps-script.js       | Codigo para pegar en Google Apps Script        |
+
+---
+
+## PASO 1 — Crear la hoja de calculo en Google Sheets
+
+1. Ve a sheets.google.com
+2. Crea una hoja en blanco
+3. Nombrarla: Evaluaciones Gestion Hidrica
+
+---
+
+## PASO 2 — Crear el backend (Google Apps Script)
+
+1. Dentro de la hoja de calculo, clic en Extensiones > Apps Script
+2. En el editor que se abre, BORRA todo el codigo por defecto
+3. Abre el archivo apps-script.js con el Bloc de notas y copia todo el contenido
+4. Pegalo en el editor de Apps Script
+5. Guarda con Ctrl + S y ponle nombre: Backend Formulario
+
+---
+
+## PASO 3 — Implementar el Apps Script (obtener la URL)
+
+1. Clic en el boton "Implementar" (arriba a la derecha) > "Nueva implementacion"
+2. Haz clic en el engranaje junto a "Tipo" > selecciona "Aplicacion web"
+3. Configura:
+   - Ejecutar como: Yo (tu cuenta de Google)
+   - Quien tiene acceso: Cualquier persona
+4. Clic en "Implementar"
+5. Autoriza los permisos que te solicite (es tu propia cuenta)
+6. Aparecera una URL larga — COPIALA COMPLETA
+
+---
+
+## PASO 4 — Pegar la URL en los archivos HTML
+
+Abre index.html con el Bloc de notas (clic derecho > Abrir con > Bloc de notas).
+
+Busca esta linea:
+    const APPS_SCRIPT_URL = 'REEMPLAZAR_CON_TU_URL';
+
+Reemplaza REEMPLAZAR_CON_TU_URL por tu URL. Ejemplo:
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfyc.../exec';
+
+Guarda el archivo. Repite exactamente lo mismo en resultados.html.
+
+---
+
+## PASO 5 — Crear un repositorio en GitHub
+
+1. Ve a github.com e inicia sesion (o crea una cuenta gratis)
+2. Clic en "New repository" (boton verde o icono +)
+3. Nombre del repositorio: formulario-evaluacion
+4. Visibilidad: Public
+5. NO marques ninguna opcion de inicializacion
+6. Clic en "Create repository"
+
+---
+
+## PASO 6 — Subir los archivos con Git (PowerShell)
+
+Ejecuta estos comandos uno por uno en PowerShell:
+
+    cd "$env:USERPROFILE\Desktop\formulario-evaluacion"
+    git init
+    git add .
+    git commit -m "Formulario de evaluacion inicial"
+    git remote add origin https://github.com/TU_USUARIO/formulario-evaluacion.git
+    git branch -M main
+    git push -u origin main
+
+Reemplaza TU_USUARIO con tu nombre de usuario de GitHub.
+
+NOTA: Si Git no esta instalado, descargalo desde git-scm.com
+Si pide contrasena, usa un Personal Access Token (Settings > Developer settings > Personal access tokens > Generate new token, con permisos "repo").
+
+---
+
+## PASO 7 — Activar GitHub Pages
+
+1. En tu repositorio de GitHub, ve a Settings (pestana superior)
+2. En el menu lateral, clic en Pages
+3. En "Source" selecciona: Deploy from a branch
+4. En "Branch" selecciona: main / (root)
+5. Clic en Save
+6. Espera 1-2 minutos y recarga la pagina
+
+Tu formulario estara en:
+    https://TU_USUARIO.github.io/formulario-evaluacion/
+
+El dashboard de resultados estara en:
+    https://TU_USUARIO.github.io/formulario-evaluacion/resultados.html
+
+---
+
+## PASO 8 — Compartir el enlace
+
+Comparte la URL de GitHub Pages con todos los evaluadores.
+Cada vez que alguien complete y guarde una evaluacion, aparecera en el dashboard.
+
+---
+
+## Actualizar archivos despues de cambios
+
+    cd "$env:USERPROFILE\Desktop\formulario-evaluacion"
+    git add .
+    git commit -m "descripcion del cambio"
+    git push
+
+---
+
+## Preguntas frecuentes
+
+Donde se almacenan las respuestas?
+  En tu Google Sheet. Puedes verlas directamente en sheets.google.com.
+
+El formulario tiene un limite de respuestas?
+  No. Google Sheets acepta hasta 10 millones de celdas de forma gratuita.
+
+El grafico se actualiza automaticamente?
+  No automaticamente. Pulsa "Actualizar datos" en resultados.html para cargar los ultimos datos.

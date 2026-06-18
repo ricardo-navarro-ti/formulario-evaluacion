@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resultados — Gestión Hídrica</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"><\/script>
+  <style>
+    :root{--primary:#2c3e50;--bg:#f5f6fa;--card:#fff;--border:#dde1e7;--muted:#7f8c8d;--gold:#f39c12;--silver:#95a5a6;--bronze:#ca6f1e}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--primary);padding-bottom:64px}
+    header{background:var(--primary);color:#fff;padding:28px 40px;text-align:center}
+    header h1{font-size:1.45rem;font-weight:700} header p{margin-top:6px;font-size:.9rem;opacity:.75}
+    .top-nav{background:#1a252f;padding:0 40px;display:flex;gap:4px}
+    .top-nav a{color:rgba(255,255,255,.72);text-decoration:none;padding:10px 18px;font-size:.84rem;font-weight:600;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;display:inline-block}
+    .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:#3498db}
+    .container{max-width:960px;margin:0 auto;padding:24px 16px}
+    .card{background:var(--card);border-radius:10px;padding:24px 28px;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:24px}
+    .card h2{font-size:1rem;color:var(--primary);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+    .config-notice{background:#fef9e7;border:1.5px solid #f9ca24;border-radius:8px;padding:12px 16px;font-size:.85rem;color:#7d6608;margin-bottom:20px;display:none}
+    .config-notice.visible{display:block}
+    .actions-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px}
+    .btn{padding:10px 22px;border-radius:8px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:filter .15s}
+    .btn-primary{background:var(--primary);color:#fff} .btn-primary:hover{filter:brightness(1.15)}
+    #status-msg{font-size:.85rem;color:var(--muted)}
+    #loading{text-align:center;padding:40px;color:var(--muted);display:none} #loading.visible{display:block}
+    .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #empty{text-align:center;padding:40px;color:var(--muted);display:none} #empty.visible{display:block}
+    #chart-section{display:none} #chart-section.visible{display:block}
+    .chart-container{position:relative;height:340px}
+    #table-section{display:none} #table-section.visible{display:block}
+    .ranking-table{width:100%;border-collapse:collapse}
+    .ranking-table th{background:#f0f2f5;padding:10px 12px;text-align:left;font-size:.76rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:2px solid var(--border)}
+    .ranking-table td{padding:12px;border-bottom:1px solid var(--border);font-size:.88rem;vertical-align:middle}
+    .ranking-table tr:last-child td{border-bottom:none}
+    .ranking-table tbody tr:hover td{background:#f8f9fa}
+    .pos-badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-weight:800;font-size:.88rem}
+    .pos-1{background:var(--gold);color:#fff} .pos-2{background:var(--silver);color:#fff} .pos-3{background:var(--bronze);color:#fff} .pos-n{background:#ecf0f1;color:var(--muted)}
+    .nota-chip{display:inline-block;padding:3px 12px;border-radius:20px;font-weight:800;font-size:.95rem}
+    .nota-hi{background:#d5f5e3;color:#1e8449} .nota-ok{background:#d6eaf8;color:#1a5276} .nota-mid{background:#fdfad3;color:#7d6608} .nota-low{background:#fdf2f2;color:#c0392b}
+    #winner-banner{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;border-radius:10px;padding:18px 24px;margin-bottom:24px;display:none;align-items:center;gap:16px}
+    #winner-banner.visible{display:flex}
+    .winner-trophy{font-size:2.5rem}
+    .winner-text h3{font-size:1.05rem;opacity:.85;font-weight:600} .winner-text p{font-size:1.5rem;font-weight:800}
+    @media(max-width:600px){header{padding:18px 16px}.top-nav{padding:0 10px}.card{padding:16px}.ranking-table th:nth-child(3),.ranking-table td:nth-child(3){display:none}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Resultados — Gestión Hídrica</h1>
+  <p>Ranking de evaluaciones recibidas</p>
+</header>
+<nav class="top-nav">
+  <a href="index.html">&#128196; Evaluar</a>
+  <a href="resultados.html" class="active">&#127941; Ver Resultados</a>
+</nav>
+<div class="container">
+  <div class="config-notice" id="config-notice">&#9888; <strong>Configuración pendiente:</strong> Abre <code>resultados.html</code> y reemplaza <code>https://script.google.com/macros/s/AKfycbwpdIOBht2G9En2vuX-SlfhE9AiMzwK7NSi0juK0sARnz-PL1da7Oqvl-SDQKCDU-Q/exec</code> con la URL de tu implementación de Google Apps Script. Ver <code>GUIA-PUBLICACION.md</code>.</div>
+  <div id="winner-banner">
+    <div class="winner-trophy">&#127942;</div>
+    <div class="winner-text"><h3>Grupo con mayor nota</h3><p id="winner-name">—</p></div>
+    <div style="margin-left:auto;text-align:center"><div style="font-size:.8rem;opacity:.8;font-weight:600">NOTA FINAL</div><div style="font-size:2.2rem;font-weight:900" id="winner-nota">—</div></div>
+  </div>
+  <div class="actions-bar">
+    <button class="btn btn-primary" onclick="loadData()">&#8635; Actualizar datos</button>
+    <span id="status-msg"></span>
+  </div>
+  <div id="loading"><div class="spinner"></div><p>Cargando evaluaciones...</p></div>
+  <div id="empty">
+    <p style="font-size:2.5rem;margin-bottom:12px">&#128219;</p>
+    <p style="font-size:1.05rem;font-weight:600;margin-bottom:6px">Aún no hay evaluaciones guardadas</p>
+    <p>Completa y guarda una evaluación desde el formulario para verla aquí.</p>
+  </div>
+  <div class="card" id="chart-section">
+    <h2>&#128202; Notas Finales por Grupo</h2>
+    <div class="chart-container"><canvas id="myChart"></canvas></div>
+  </div>
+  <div class="card" id="table-section">
+    <h2>&#127775; Ranking de Evaluaciones</h2>
+    <table class="ranking-table">
+      <thead><tr>
+        <th style="width:52px">Pos.</th>
+        <th>Grupo / Evaluado</th>
+        <th>Evaluador/a</th>
+        <th>Fecha</th>
+        <th style="width:85px;text-align:center">Técnico</th>
+        <th style="width:85px;text-align:center">Forma</th>
+        <th style="width:95px;text-align:center">Nota Final</th>
+      </tr></thead>
+      <tbody id="ranking-body"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpdIOBht2G9En2vuX-SlfhE9AiMzwK7NSi0juK0sARnz-PL1da7Oqvl-SDQKCDU-Q/exec';
+let chartInstance = null;
+function loadData() {
+  if(APPS_SCRIPT_URL===''){document.getElementById('config-notice').classList.add('visible');return;}
+  document.getElementById('config-notice').classList.remove('visible');
+  setLoading(true); document.getElementById('status-msg').textContent=''; document.getElementById('winner-banner').classList.remove('visible');
+  const old=document.getElementById('jsonp-script'); if(old) old.remove();
+  const script=document.createElement('script'); script.id='jsonp-script';
+  script.src=APPS_SCRIPT_URL+'?callback=receiveData&t='+Date.now();
+  script.onerror=function(){setLoading(false);document.getElementById('status-msg').textContent='No se pudieron cargar los datos.';};
+  document.body.appendChild(script);
+  setTimeout(function(){if(document.getElementById('loading').classList.contains('visible')){setLoading(false);document.getElementById('status-msg').textContent='Tiempo de espera agotado.';}},12000);
+}
+function receiveData(rawData) {
+  setLoading(false);
+  if(!rawData||rawData.length===0){document.getElementById('empty').classList.add('visible');document.getElementById('chart-section').classList.remove('visible');document.getElementById('table-section').classList.remove('visible');return;}
+  document.getElementById('empty').classList.remove('visible');
+  const evaluaciones=rawData.map(function(row){return{grupo:String(row['Grupo']||'(Sin nombre)'),evaluador:String(row['Evaluador']||''),fecha:String(row['Fecha']||''),avgTec:parseFloat(row['PromedioTecnico'])||0,avgFrm:parseFloat(row['PromedioForma'])||0,notaFinal:parseFloat(row['NotaFinal'])||0};}).sort(function(a,b){return b.notaFinal-a.notaFinal;});
+  if(evaluaciones.length>0){document.getElementById('winner-name').textContent=evaluaciones[0].grupo;document.getElementById('winner-nota').textContent=evaluaciones[0].notaFinal.toFixed(1);document.getElementById('winner-banner').classList.add('visible');}
+  renderChart(evaluaciones); renderTable(evaluaciones);
+  document.getElementById('chart-section').classList.add('visible'); document.getElementById('table-section').classList.add('visible');
+  document.getElementById('status-msg').textContent='Actualizado: '+new Date().toLocaleTimeString('es-CL')+'  |  '+evaluaciones.length+' evaluación(es)';
+}
+function renderChart(data) {
+  const ctx=document.getElementById('myChart').getContext('2d');
+  const labels=data.map(function(d){return d.grupo;}); const notas=data.map(function(d){return d.notaFinal;});
+  const colors=notas.map(function(n){return n>=6.5?'#16a085':n>=5.5?'#27ae60':n>=4.5?'#d4ac0d':n>=3.5?'#e67e22':'#e74c3c';});
+  if(chartInstance) chartInstance.destroy();
+  chartInstance=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Nota Final',data:notas,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'Nota: '+ctx.parsed.y.toFixed(1);}}}},scales:{y:{min:1,max:7,ticks:{stepSize:1},grid:{color:'#eee'}},x:{grid:{display:false},ticks:{maxRotation:35,font:{size:12}}}}}});
+}
+function renderTable(data) {
+  const tbody=document.getElementById('ranking-body'); tbody.innerHTML='';
+  data.forEach(function(d,i){
+    const pos=i+1;
+    const posClass=pos===1?'pos-1':pos===2?'pos-2':pos===3?'pos-3':'pos-n';
+    const notaClass=d.notaFinal>=6.5?'nota-hi':d.notaFinal>=5.5?'nota-ok':d.notaFinal>=4.5?'nota-mid':'nota-low';
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="pos-badge '+posClass+'">'+pos+'</span></td><td><strong>'+esc(d.grupo)+'</strong></td><td>'+esc(d.evaluador)+'</td><td>'+esc(d.fecha)+'</td><td style="text-align:center">'+d.avgTec.toFixed(1)+'</td><td style="text-align:center">'+d.avgFrm.toFixed(1)+'</td><td style="text-align:center"><span class="nota-chip '+notaClass+'">'+d.notaFinal.toFixed(1)+'</span></td>';
+    tbody.appendChild(tr);
+  });
+}
+function esc(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setLoading(on){document.getElementById('loading').classList.toggle('visible',on);}
+loadData();
+<\/script>
+</body>
+</html>

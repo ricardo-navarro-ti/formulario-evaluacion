@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pauta de Evaluación — Gestión Hídrica</title>
+  <style>
+    :root { --c1:#e74c3c;--c1-sel:#c0392b;--c2:#e67e22;--c2-sel:#ca6f1e;--c3:#d4ac0d;--c3-sel:#b7950b;--c4:#27ae60;--c4-sel:#1e8449;--c5:#16a085;--c5-sel:#0e6655;--primary:#2c3e50;--bg:#f5f6fa;--card:#fff;--border:#dde1e7;--text:#2c3e50;--muted:#7f8c8d }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding-bottom:64px}
+    header{background:var(--primary);color:#fff;padding:28px 40px;text-align:center}
+    header h1{font-size:1.45rem;font-weight:700}
+    header p{margin-top:6px;font-size:.9rem;opacity:.75}
+    .top-nav{background:#1a252f;padding:0 40px;display:flex;gap:4px}
+    .top-nav a{color:rgba(255,255,255,.72);text-decoration:none;padding:10px 18px;font-size:.84rem;font-weight:600;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;display:inline-block}
+    .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:#3498db}
+    .meta-section{max-width:960px;margin:28px auto 0;background:var(--card);border-radius:10px;padding:22px 28px;box-shadow:0 2px 10px rgba(0,0,0,.07);display:flex;gap:20px;flex-wrap:wrap}
+    .meta-group{flex:1 1 190px}
+    .meta-group label{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px}
+    .meta-group input{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:8px 11px;font-size:.93rem;outline:none;transition:border-color .15s}
+    .meta-group input:focus{border-color:var(--primary)}
+    .alert{max-width:960px;margin:18px auto 0;background:#fdf2f2;border:1.5px solid #f5b7b1;color:#c0392b;border-radius:8px;padding:11px 16px;font-size:.88rem;display:none}
+    .alert.visible{display:block}
+    .section-card{max-width:960px;margin:24px auto 0;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+    .section-header{background:var(--primary);color:#fff;padding:13px 22px;font-size:.97rem;font-weight:700;display:flex;align-items:center;gap:12px}
+    .section-header .badge{background:rgba(255,255,255,.18);padding:3px 11px;border-radius:20px;font-size:.78rem;font-weight:600}
+    .table-wrapper{overflow-x:auto}
+    .rubric-table{width:100%;border-collapse:collapse;min-width:700px}
+    .rubric-table thead th{background:#f0f2f5;padding:10px 7px;font-size:.76rem;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border);vertical-align:bottom}
+    .rubric-table thead th.col-crit{text-align:left;padding-left:16px;width:21%}
+    .rubric-table thead th.col-score{width:52px}
+    .rubric-table tbody tr{border-bottom:1px solid var(--border)}
+    .rubric-table tbody tr:last-child{border-bottom:none}
+    .rubric-table td{padding:7px 5px;vertical-align:top}
+    .rubric-table td.col-crit{font-size:.84rem;font-weight:600;padding:10px 10px 10px 16px;vertical-align:middle;width:21%}
+    .level-cell{cursor:pointer;border-radius:7px;padding:8px 6px;text-align:center;user-select:none;transition:filter .12s,border-color .12s;border:2px solid transparent}
+    .level-cell:hover{filter:brightness(.93)}
+    .level-cell .lv-label{display:block;font-size:.82rem;font-weight:700;margin-bottom:3px}
+    .level-cell .lv-desc{font-size:.72rem;color:var(--muted);line-height:1.4}
+    td:nth-child(2) .level-cell{background:#fdf2f2} td:nth-child(2) .level-cell.selected{background:var(--c1);border-color:var(--c1-sel)}
+    td:nth-child(3) .level-cell{background:#fef5eb} td:nth-child(3) .level-cell.selected{background:var(--c2);border-color:var(--c2-sel)}
+    td:nth-child(4) .level-cell{background:#fefce7} td:nth-child(4) .level-cell.selected{background:var(--c3);border-color:var(--c3-sel)}
+    td:nth-child(5) .level-cell{background:#f0faf4} td:nth-child(5) .level-cell.selected{background:var(--c4);border-color:var(--c4-sel)}
+    td:nth-child(6) .level-cell{background:#edfaf7} td:nth-child(6) .level-cell.selected{background:var(--c5);border-color:var(--c5-sel)}
+    .level-cell.selected .lv-label,.level-cell.selected .lv-desc{color:#fff}
+    .col-score{text-align:center;vertical-align:middle;font-size:1.08rem;font-weight:700;color:var(--muted);padding:0 6px}
+    .col-score.has-val{color:var(--primary)}
+    .totals-row td{background:#f0f2f5;font-size:.87rem;font-weight:700;padding:11px 16px;border-top:2px solid var(--border)}
+    .totals-row .t-val{text-align:center;color:var(--primary);font-size:.97rem}
+    .actions{max-width:960px;margin:28px auto 0;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .btn{padding:12px 30px;border-radius:8px;border:none;font-size:.97rem;font-weight:700;cursor:pointer;transition:background .15s,filter .15s}
+    .btn-primary{background:var(--primary);color:#fff} .btn-primary:hover{filter:brightness(1.15)}
+    .btn-outline{background:#fff;color:var(--primary);border:2px solid var(--primary)} .btn-outline:hover{background:#f0f2f5}
+    .btn-success{background:#27ae60;color:#fff} .btn-success:hover{filter:brightness(1.12)} .btn-success:disabled{opacity:.6;cursor:default;filter:none}
+    #results{max-width:960px;margin:28px auto 0;background:var(--card);border-radius:10px;padding:28px 32px;box-shadow:0 2px 10px rgba(0,0,0,.07);display:none}
+    #results.visible{display:block}
+    #results h2{font-size:1.1rem;color:var(--primary);margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+    .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+    .result-box{background:#f5f6fa;border-radius:9px;padding:16px 12px;text-align:center}
+    .result-box .r-lbl{font-size:.73rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin-bottom:8px}
+    .result-box .r-val{font-size:2rem;font-weight:800;color:var(--primary)}
+    .result-box.final-box{background:var(--primary)} .result-box.final-box .r-lbl{color:rgba(255,255,255,.7)} .result-box.final-box .r-val{color:#fff;font-size:2.6rem}
+    .submit-area{margin-top:22px;text-align:center}
+    #submit-msg{display:none;margin-top:10px;font-size:.88rem;padding:8px 16px;border-radius:6px}
+    #submit-msg.visible{display:inline-block} #submit-msg.ok{background:#d5f5e3;color:#1e8449} #submit-msg.err{background:#fdf2f2;color:#c0392b} #submit-msg.sending{background:#eaf2fb;color:#2471a3}
+    .result-meta{font-size:.83rem;color:var(--muted);text-align:center;margin-top:14px}
+    @media print{body{background:#fff}.top-nav,.actions,#alert-msg,.submit-area{display:none!important}.section-card,.meta-section,#results{box-shadow:none}#results{display:block!important}}
+    @media(max-width:640px){header{padding:18px 16px}header h1{font-size:1.15rem}.top-nav{padding:0 10px}.meta-section{padding:16px}.actions{flex-direction:column;align-items:stretch}.btn{text-align:center}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Pauta de Evaluación — Gestión Hídrica</h1>
+  <p>Evaluación de propuesta grupal — Escala 1 a 7</p>
+</header>
+<nav class="top-nav">
+  <a href="index.html" class="active">&#128196; Evaluar</a>
+  <a href="resultados.html">&#127941; Ver Resultados</a>
+</nav>
+<div class="meta-section">
+  <div class="meta-group">
+    <label for="nombre-grupo">Nombre del grupo / alumno</label>
+    <input type="text" id="nombre-grupo" placeholder="Ej: Grupo 3 — Cuenca del Maipo" />
+  </div>
+  <div class="meta-group">
+    <label for="evaluador">Evaluador/a</label>
+    <input type="text" id="evaluador" placeholder="Nombre del docente" />
+  </div>
+  <div class="meta-group">
+    <label for="fecha-eval">Fecha de evaluación</label>
+    <input type="date" id="fecha-eval" />
+  </div>
+</div>
+<div class="alert" id="alert-msg"></div>
+<div class="section-card">
+  <div class="section-header">Aspectos Técnicos <span class="badge">60% de la nota</span></div>
+  <div class="table-wrapper">
+    <table class="rubric-table">
+      <thead><tr>
+        <th class="col-crit">Criterio</th>
+        <th>1–2<br><small>Deficiente</small></th>
+        <th>3–4<br><small>Básico</small></th>
+        <th>5<br><small>Adecuado</small></th>
+        <th>6<br><small>Bueno</small></th>
+        <th>7<br><small>Excelente</small></th>
+        <th class="col-score">Nota</th>
+      </tr></thead>
+      <tbody id="tbody-tecnico"></tbody>
+      <tfoot>
+        <tr class="totals-row"><td colspan="6">Promedio Aspectos Técnicos</td><td class="t-val" id="avg-tecnico">—</td></tr>
+        <tr class="totals-row"><td colspan="6">60% del Promedio Técnico</td><td class="t-val" id="pct-tecnico">—</td></tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+<div class="section-card">
+  <div class="section-header">Aspectos de Forma <span class="badge">40% de la nota</span></div>
+  <div class="table-wrapper">
+    <table class="rubric-table">
+      <thead><tr>
+        <th class="col-crit">Criterio</th>
+        <th>1–2<br><small>Deficiente</small></th>
+        <th>3–4<br><small>Básico</small></th>
+        <th>5<br><small>Adecuado</small></th>
+        <th>6<br><small>Bueno</small></th>
+        <th>7<br><small>Excelente</small></th>
+        <th class="col-score">Nota</th>
+      </tr></thead>
+      <tbody id="tbody-forma"></tbody>
+      <tfoot>
+        <tr class="totals-row"><td colspan="6">Promedio Aspectos de Forma</td><td class="t-val" id="avg-forma">—</td></tr>
+        <tr class="totals-row"><td colspan="6">40% del Promedio de Forma</td><td class="t-val" id="pct-forma">—</td></tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+<div class="actions">
+  <button class="btn btn-outline" onclick="resetForm()">&#8635; Limpiar</button>
+  <button class="btn btn-primary" onclick="calcularNota()">&#10003; Calcular Nota Final</button>
+  <button class="btn btn-outline" onclick="window.print()">&#128438; Imprimir / PDF</button>
+</div>
+<div id="results">
+  <h2>&#127941; Resultado de la Evaluación</h2>
+  <div class="result-grid">
+    <div class="result-box"><div class="r-lbl">Promedio Técnico</div><div class="r-val" id="r-avg-tec">—</div></div>
+    <div class="result-box"><div class="r-lbl">60% Técnico</div><div class="r-val" id="r-pct-tec">—</div></div>
+    <div class="result-box"><div class="r-lbl">Promedio Forma</div><div class="r-val" id="r-avg-frm">—</div></div>
+    <div class="result-box"><div class="r-lbl">40% Forma</div><div class="r-val" id="r-pct-frm">—</div></div>
+    <div class="result-box final-box"><div class="r-lbl">Nota Final</div><div class="r-val" id="r-final">—</div></div>
+  </div>
+  <div class="submit-area">
+    <button class="btn btn-success" id="btn-guardar" onclick="submitEvaluacion()">&#128190; Guardar en Google Sheets</button>
+    <div id="submit-msg"></div>
+  </div>
+  <p class="result-meta" id="result-meta"></p>
+</div>
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpdIOBht2G9En2vuX-SlfhE9AiMzwK7NSi0juK0sARnz-PL1da7Oqvl-SDQKCDU-Q/exec';
+const LEVELS = [
+  {label:'1-2',name:'Deficiente',value:2},
+  {label:'3-4',name:'Basico',value:4},
+  {label:'5',name:'Adecuado',value:5},
+  {label:'6',name:'Bueno',value:6},
+  {label:'7',name:'Excelente',value:7}
+];
+const CRITERIOS_TECNICOS = [
+  {id:'t1',nombre:'Descripción del entorno (ambiental, social y económico)',descriptores:['Descripción inexistente o incorrecta.','Descripción superficial o incompleta.','Describe aspectos básicos del entorno.','Descripción clara e integrada.','Análisis completo, integrado y bien fundamentado del entorno.']},
+  {id:'t2',nombre:'Identificación de actores e interacciones en la cuenca',descriptores:['No identifica actores ni interacciones.','Identificación parcial o poco clara.','Identifica actores e interacciones básicas.','Análisis claro de dinámicas entre actores.','Análisis profundo, considerando múltiples relaciones y complejidades.']},
+  {id:'t3',nombre:'Identificación de factores que afectan entradas/consumos de agua fresca',descriptores:['No identifica factores o es incorrecto.','Identificación incompleta de factores.','Identifica los principales factores.','Identificación clara y detallada.','Identificación exhaustiva y bien justificada.']},
+  {id:'t4',nombre:'Identificación de factores que generan pérdidas de agua',descriptores:['No identifica factores o es incorrecto.','Identificación incompleta de factores.','Identifica los principales factores.','Identificación clara y detallada.','Identificación exhaustiva y bien justificada.']},
+  {id:'t5',nombre:'Propuesta de medidas de reducción (uso agua fresca y pérdidas)',descriptores:['No propone medidas o son irrelevantes.','Medidas poco claras o poco factibles.','Propone medidas básicas.','Medidas claras, pertinentes y factibles.','Medidas innovadoras, viables y bien fundamentadas.']},
+  {id:'t6',nombre:'Propuesta socialmente equitativa',descriptores:['No analiza ni identifica aspectos de equidad social.','Identifica superficialmente la equidad social, sin profundizar.','Reconoce la importancia de la equidad y menciona algunos grupos afectados.','Analiza la equidad social, describe impactos en varios grupos y propone mejoras generales.','Análisis detallado: identifica impactos en distintos grupos, propone mejoras específicas y soluciones innovadoras.']},
+  {id:'t7',nombre:'Propuesta ambientalmente sostenible',descriptores:['No analiza ni menciona la sostenibilidad ambiental.','Menciona sostenibilidad ambiental de forma superficial.','Reconoce la importancia de la sostenibilidad, menciona algunos beneficios o impactos.','Analiza impactos ambientales, incluye propuestas de mitigación y beneficios a largo plazo.','Análisis exhaustivo: identifica todos los impactos, propone estrategias innovadoras de mitigación y mejora.']},
+  {id:'t8',nombre:'Propuesta económicamente beneficiosa',descriptores:['No analiza ni menciona beneficios económicos.','Menciona beneficios económicos de manera superficial.','Reconoce beneficios económicos, analiza costos y ventajas de manera general.','Analiza costos, retorno de inversión y ventajas económicas, proponiendo mejoras.','Análisis integral: considera actores, costos, beneficios y retorno de inversión, propone soluciones innovadoras.']},
+  {id:'t9',nombre:'Coherencia e integración de la propuesta',descriptores:['Trabajo desarticulado.','Baja coherencia.','Coherencia básica.','Buena integración de los elementos.','Alta coherencia, visión sistémica y enfoque estratégico.']},
+  {id:'t10',nombre:'Uso adecuado de prompts',descriptores:['Muy general, confuso o incompleto.','Poco específico y ambiguo.','Incluye algunas instrucciones y es comprensible.','Bien detallado, claro y bien formulado.','Altamente específico, muy claro, preciso y sin ambigüedades.']}
+];
+const CRITERIOS_FORMA = [
+  {id:'f1',nombre:'Estructura',descriptores:['Sin orden lógico.','Orden poco claro.','Estructura básica (inicio-desarrollo-cierre).','Estructura clara y coherente.','Flujo muy lógico y transiciones fluidas.']},
+  {id:'f2',nombre:'Claridad y síntesis',descriptores:['Información confusa, excesivo texto.','Ideas poco claras o extensas.','Mensajes comprensibles.','Ideas claras y bien sintetizadas.','Mensajes muy claros, precisos y fáciles de seguir.']},
+  {id:'f3',nombre:'Diseño visual',descriptores:['Diapositivas desordenadas, saturadas, difícil lectura.','Diseño poco consistente, sobrecarga de texto.','Diseño claro pero mejorable.','Buen uso de colores, tipografía y espacio.','Diseño limpio, atractivo y altamente profesional.']},
+  {id:'f4',nombre:'Uso de recursos visuales',descriptores:['No usa o usa mal imágenes/gráficos.','Uso limitado o poco pertinente.','Uso adecuado de recursos.','Recursos bien integrados.','Uso estratégico y de alto impacto visual.']},
+  {id:'f5',nombre:'Coherencia y estilo',descriptores:['Formato inconsistente.','Variaciones notorias de estilo.','Estilo mayormente consistente.','Estilo uniforme y profesional.','Alto nivel de consistencia y cuidado estético.']},
+  {id:'f6',nombre:'Ortografía y redacción',descriptores:['Muchos errores.','Varios errores.','Algunos errores menores.','Redacción correcta, pocos errores.','Redacción impecable.']}
+];
+const selections = {};
+function buildTable(tbodyId, criterios) {
+  const tbody = document.getElementById(tbodyId);
+  criterios.forEach(c => {
+    const tr = document.createElement('tr');
+    const nameTd = document.createElement('td'); nameTd.className='col-crit'; nameTd.textContent=c.nombre; tr.appendChild(nameTd);
+    LEVELS.forEach((lvl,idx) => {
+      const td=document.createElement('td'); const div=document.createElement('div'); div.className='level-cell';
+      div.innerHTML='<span class="lv-label">'+lvl.label+'</span><span class="lv-desc">'+c.descriptores[idx]+'</span>';
+      div.addEventListener('click',()=>selectLevel(c.id,idx,tr)); td.appendChild(div); tr.appendChild(td);
+    });
+    const scoreTd=document.createElement('td'); scoreTd.className='col-score'; scoreTd.id='score-'+c.id; scoreTd.textContent='—'; tr.appendChild(scoreTd);
+    tbody.appendChild(tr);
+  });
+}
+function selectLevel(criterioId,levelIdx,tr) {
+  tr.querySelectorAll('.level-cell').forEach(el=>el.classList.remove('selected'));
+  tr.querySelectorAll('.level-cell')[levelIdx].classList.add('selected');
+  selections[criterioId]=levelIdx;
+  const scoreEl=document.getElementById('score-'+criterioId); scoreEl.textContent=LEVELS[levelIdx].value; scoreEl.classList.add('has-val');
+  updateLiveTotals();
+}
+function getAvg(criterios) {
+  const vals=criterios.filter(c=>selections[c.id]!==undefined).map(c=>LEVELS[selections[c.id]].value);
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+b,0)/vals.length;
+}
+function fmt(n){return n===null?'—':n.toFixed(1)}
+function updateLiveTotals() {
+  const avgTec=getAvg(CRITERIOS_TECNICOS); const avgFrm=getAvg(CRITERIOS_FORMA);
+  document.getElementById('avg-tecnico').textContent=fmt(avgTec);
+  document.getElementById('pct-tecnico').textContent=avgTec!==null?fmt(avgTec*0.6):'—';
+  document.getElementById('avg-forma').textContent=fmt(avgFrm);
+  document.getElementById('pct-forma').textContent=avgFrm!==null?fmt(avgFrm*0.4):'—';
+}
+function calcularNota() {
+  const alertEl=document.getElementById('alert-msg');
+  const allCriterios=[...CRITERIOS_TECNICOS,...CRITERIOS_FORMA];
+  const missing=allCriterios.filter(c=>selections[c.id]===undefined);
+  if(missing.length>0){
+    alertEl.textContent='⚠️ Faltan '+missing.length+' criterio(s) por evaluar: '+missing.map(c=>c.nombre).join(' · ')+'.';
+    alertEl.classList.add('visible'); alertEl.scrollIntoView({behavior:'smooth',block:'center'}); return;
+  }
+  alertEl.classList.remove('visible');
+  const avgTec=getAvg(CRITERIOS_TECNICOS); const avgFrm=getAvg(CRITERIOS_FORMA);
+  const pctTec=avgTec*0.6; const pctFrm=avgFrm*0.4; const notaFinal=pctTec+pctFrm;
+  document.getElementById('r-avg-tec').textContent=fmt(avgTec);
+  document.getElementById('r-pct-tec').textContent=fmt(pctTec);
+  document.getElementById('r-avg-frm').textContent=fmt(avgFrm);
+  document.getElementById('r-pct-frm').textContent=fmt(pctFrm);
+  document.getElementById('r-final').textContent=notaFinal.toFixed(1);
+  const grupo=document.getElementById('nombre-grupo').value.trim();
+  const eval_=document.getElementById('evaluador').value.trim();
+  const fecha=document.getElementById('fecha-eval').value;
+  const partes=[]; if(grupo) partes.push('Grupo: '+grupo); if(eval_) partes.push('Evaluador/a: '+eval_); if(fecha) partes.push('Fecha: '+fecha);
+  document.getElementById('result-meta').textContent=partes.join('  |  ');
+  const btnG=document.getElementById('btn-guardar'); btnG.disabled=false; btnG.textContent='💾 Guardar en Google Sheets';
+  const msgEl=document.getElementById('submit-msg'); msgEl.className=''; msgEl.textContent='';
+  const resultsEl=document.getElementById('results'); resultsEl.classList.add('visible'); resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function submitEvaluacion() {
+  if(APPS_SCRIPT_URL===''){showSubmitMsg('err','⚠️ Configura primero la URL del Apps Script (ver GUIA-PUBLICACION.md).'); return;}
+  const allCriterios=[...CRITERIOS_TECNICOS,...CRITERIOS_FORMA];
+  if(allCriterios.some(c=>selections[c.id]===undefined)){showSubmitMsg('err','⚠️ Calcula la nota antes de guardar.'); return;}
+  const tecnicoScores=CRITERIOS_TECNICOS.map(c=>LEVELS[selections[c.id]].value);
+  const formaScores=CRITERIOS_FORMA.map(c=>LEVELS[selections[c.id]].value);
+  const avgTec=tecnicoScores.reduce((a,b)=>a+b,0)/tecnicoScores.length;
+  const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
+  const notaFinal=avgTec*0.6+avgFrm*0.4;
+  const payload={grupo:document.getElementById('nombre-grupo').value.trim()||'(Sin nombre)',evaluador:document.getElementById('evaluador').value.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
+  showSubmitMsg('sending','⏳ Guardando...');
+  const btnG=document.getElementById('btn-guardar'); btnG.disabled=true;
+  try{
+    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+    showSubmitMsg('ok','✓ Evaluación guardada correctamente en Google Sheets.');
+    btnG.textContent='✓ Guardado';
+  }catch(err){showSubmitMsg('err','✗ No se pudo conectar. Revisa tu conexión o la URL del script.'); btnG.disabled=false;}
+}
+function showSubmitMsg(type,text){const el=document.getElementById('submit-msg'); el.className='visible '+type; el.textContent=text;}
+function resetForm() {
+  Object.keys(selections).forEach(k=>delete selections[k]);
+  document.querySelectorAll('.level-cell').forEach(el=>el.classList.remove('selected'));
+  document.querySelectorAll('.col-score').forEach(el=>{el.textContent='—'; el.classList.remove('has-val');});
+  ['avg-tecnico','pct-tecnico','avg-forma','pct-forma'].forEach(id=>document.getElementById(id).textContent='—');
+  ['r-avg-tec','r-pct-tec','r-avg-frm','r-pct-frm','r-final'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('nombre-grupo').value=''; document.getElementById('evaluador').value='';
+  document.getElementById('fecha-eval').valueAsDate=new Date();
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('alert-msg').classList.remove('visible');
+  const btnG=document.getElementById('btn-guardar'); btnG.disabled=false; btnG.textContent='💾 Guardar en Google Sheets';
+  const msgEl=document.getElementById('submit-msg'); msgEl.className=''; msgEl.textContent='';
+}
+buildTable('tbody-tecnico',CRITERIOS_TECNICOS);
+buildTable('tbody-forma',CRITERIOS_FORMA);
+document.getElementById('fecha-eval').valueAsDate=new Date();
+</script>
+</body>
+</html>
