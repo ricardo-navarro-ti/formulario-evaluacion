@@ -150,7 +150,7 @@ function renderTable(data) {
     const posClass=pos===1?'pos-1':pos===2?'pos-2':pos===3?'pos-3':'pos-n';
     const notaClass=d.notaFinal>=6.5?'nota-hi':d.notaFinal>=5.5?'nota-ok':d.notaFinal>=4.5?'nota-mid':'nota-low';
     const tr=document.createElement('tr');
-    var evText=d.count>1?(d.count+' eval.'):esc(d.evaluador);tr.innerHTML='<td><span class="pos-badge '+posClass+'">'+pos+'</span></td><td><strong>'+esc(d.grupo)+'</strong></td><td>'+evText+'</td><td style="text-align:center">'+d.avgTec.toFixed(1)+'</td><td style="text-align:center">'+d.avgFrm.toFixed(1)+'</td><td style="text-align:center"><span class="nota-chip '+notaClass+'">'+d.notaFinal.toFixed(1)+'</span></td>';
+    var evCell=d.count>1?('<span style="cursor:help;border-bottom:1px dashed #aaa" title="'+esc(d.evaluador)+'">' +d.count+' evaluadores</span><br><small style="color:#7f8c8d;font-size:.75rem">'+esc(d.evaluador)+'</small>'):esc(d.evaluador);tr.innerHTML='<td><span class="pos-badge '+posClass+'">'+pos+'</span></td><td><strong>'+esc(d.grupo)+'</strong></td><td>'+evCell+'</td><td style="text-align:center">'+d.avgTec.toFixed(1)+'</td><td style="text-align:center">'+d.avgFrm.toFixed(1)+'</td><td style="text-align:center"><span class="nota-chip '+notaClass+'">'+d.notaFinal.toFixed(1)+'</span></td>';
     tbody.appendChild(tr);
   });
 }
