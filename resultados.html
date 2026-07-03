@@ -109,11 +109,32 @@ function receiveData(rawData) {
   setLoading(false);
   if(!rawData||rawData.length===0){document.getElementById('empty').classList.add('visible');document.getElementById('chart-section').classList.remove('visible');document.getElementById('table-section').classList.remove('visible');return;}
   document.getElementById('empty').classList.remove('visible');
-  const evaluaciones=rawData.map(function(row){return{grupo:String(row['Grupo']||'(Sin nombre)'),evaluador:String(row['Evaluador']||''),fecha:String(row['Fecha']||''),avgTec:parseFloat(row['PromedioTecnico'])||0,avgFrm:parseFloat(row['PromedioForma'])||0,notaFinal:parseFloat(row['NotaFinal'])||0};}).sort(function(a,b){return b.notaFinal-a.notaFinal;});
+
+  // Parsear filas individuales
+  const filas=rawData.map(function(row){return{grupo:String(row['Grupo']||'(Sin nombre)'),evaluador:String(row['Evaluador']||''),fecha:String(row['Fecha']||''),avgTec:parseFloat(row['PromedioTecnico'])||0,avgFrm:parseFloat(row['PromedioForma'])||0,notaFinal:parseFloat(row['NotaFinal'])||0};});
+
+  // Agrupar por equipo y promediar
+  const grupos={};
+  filas.forEach(function(f){
+    if(!grupos[f.grupo]) grupos[f.grupo]={grupo:f.grupo,evaluadores:[],sumTec:0,sumFrm:0,sumFinal:0,count:0};
+    const g=grupos[f.grupo];
+    if(f.evaluador && g.evaluadores.indexOf(f.evaluador)===-1) g.evaluadores.push(f.evaluador);
+    g.sumTec+=f.avgTec; g.sumFrm+=f.avgFrm; g.sumFinal+=f.notaFinal; g.count++;
+  });
+
+  const evaluaciones=Object.values(grupos).map(function(g){return{
+    grupo:g.grupo,
+    evaluador:g.evaluadores.join(', '),
+    count:g.count,
+    avgTec:g.sumTec/g.count,
+    avgFrm:g.sumFrm/g.count,
+    notaFinal:g.sumFinal/g.count
+  };}).sort(function(a,b){return b.notaFinal-a.notaFinal;});
+
   if(evaluaciones.length>0){document.getElementById('winner-name').textContent=evaluaciones[0].grupo;document.getElementById('winner-nota').textContent=evaluaciones[0].notaFinal.toFixed(1);document.getElementById('winner-banner').classList.add('visible');}
   renderChart(evaluaciones); renderTable(evaluaciones);
   document.getElementById('chart-section').classList.add('visible'); document.getElementById('table-section').classList.add('visible');
-  document.getElementById('status-msg').textContent='Actualizado: '+new Date().toLocaleTimeString('es-CL')+'  |  '+evaluaciones.length+' evaluación(es)';
+  document.getElementById('status-msg').textContent='Actualizado: '+new Date().toLocaleTimeString('es-CL')+'  |  '+filas.length+' evaluación(es)  ·  '+evaluaciones.length+' equipo(s)';
 }
 function renderChart(data) {
   const ctx=document.getElementById('myChart').getContext('2d');
@@ -129,7 +150,7 @@ function renderTable(data) {
     const posClass=pos===1?'pos-1':pos===2?'pos-2':pos===3?'pos-3':'pos-n';
     const notaClass=d.notaFinal>=6.5?'nota-hi':d.notaFinal>=5.5?'nota-ok':d.notaFinal>=4.5?'nota-mid':'nota-low';
     const tr=document.createElement('tr');
-    tr.innerHTML='<td><span class="pos-badge '+posClass+'">'+pos+'</span></td><td><strong>'+esc(d.grupo)+'</strong></td><td>'+esc(d.evaluador)+'</td><td>'+esc(d.fecha)+'</td><td style="text-align:center">'+d.avgTec.toFixed(1)+'</td><td style="text-align:center">'+d.avgFrm.toFixed(1)+'</td><td style="text-align:center"><span class="nota-chip '+notaClass+'">'+d.notaFinal.toFixed(1)+'</span></td>';
+    var evText=d.count>1?(d.count+' eval.'):esc(d.evaluador);tr.innerHTML='<td><span class="pos-badge '+posClass+'">'+pos+'</span></td><td><strong>'+esc(d.grupo)+'</strong></td><td>'+evText+'</td><td style="text-align:center">'+d.avgTec.toFixed(1)+'</td><td style="text-align:center">'+d.avgFrm.toFixed(1)+'</td><td style="text-align:center"><span class="nota-chip '+notaClass+'">'+d.notaFinal.toFixed(1)+'</span></td>';
     tbody.appendChild(tr);
   });
 }
