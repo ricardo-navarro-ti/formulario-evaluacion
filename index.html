@@ -93,7 +93,19 @@
   </div>
   <div class="meta-group">
     <label for="evaluador">Evaluador/a</label>
-    <input type="text" id="evaluador" placeholder="Nombre del docente" />
+    <select id="evaluador" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:8px 11px;font-size:.93rem;outline:none;transition:border-color .15s;background:#fff">
+      <option value="">-- Selecciona un evaluador --</option>
+      <option value="Luis Soruco">Luis Soruco</option>
+      <option value="Vilma Pérez">Vilma Pérez</option>
+      <option value="Carolina Soto">Carolina Soto</option>
+      <option value="David Hernández">David Hernández</option>
+      <option value="Álvaro Arroyo">Álvaro Arroyo</option>
+      <option value="Felipe Morales Rivera">Felipe Morales Rivera</option>
+      <option value="Elizabeth Lam">Elizabeth Lam</option>
+      <option value="Christian Herrera">Christian Herrera</option>
+      <option value="Mauricio Trigo">Mauricio Trigo</option>
+      <option value="David Molina">David Molina</option>
+    </select>
   </div>
   <div class="meta-group">
     <label for="fecha-eval">Fecha de evaluación</label>
@@ -277,7 +289,7 @@ function resetForm() {
   document.querySelectorAll('.col-score').forEach(el=>{el.textContent='—'; el.classList.remove('has-val');});
   ['avg-tecnico','pct-tecnico','avg-forma','pct-forma'].forEach(id=>document.getElementById(id).textContent='—');
   ['r-avg-tec','r-pct-tec','r-avg-frm','r-pct-frm','r-final'].forEach(id=>document.getElementById(id).textContent='—');
-  document.getElementById('nombre-grupo').selectedIndex=0; document.getElementById('evaluador').value='';
+  document.getElementById('nombre-grupo').selectedIndex=0; document.getElementById('evaluador').selectedIndex=0;
   document.getElementById('fecha-eval').valueAsDate=new Date();
   document.getElementById('results').classList.remove('visible');
   document.getElementById('alert-msg').classList.remove('visible');
