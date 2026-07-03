@@ -116,9 +116,10 @@ function receiveData(rawData) {
   // Agrupar por equipo y promediar
   const grupos={};
   filas.forEach(function(f){
-    if(!grupos[f.grupo]) grupos[f.grupo]={grupo:f.grupo,evaluadores:[],sumTec:0,sumFrm:0,sumFinal:0,count:0};
+    if(!grupos[f.grupo]) grupos[f.grupo]={grupo:f.grupo,evaluadores:[],detalles:[],sumTec:0,sumFrm:0,sumFinal:0,count:0};
     const g=grupos[f.grupo];
     if(f.evaluador && g.evaluadores.indexOf(f.evaluador)===-1) g.evaluadores.push(f.evaluador);
+    g.detalles.push({evaluador:f.evaluador,notaFinal:f.notaFinal});
     g.sumTec+=f.avgTec; g.sumFrm+=f.avgFrm; g.sumFinal+=f.notaFinal; g.count++;
   });
 
@@ -128,7 +129,8 @@ function receiveData(rawData) {
     count:g.count,
     avgTec:g.sumTec/g.count,
     avgFrm:g.sumFrm/g.count,
-    notaFinal:g.sumFinal/g.count
+    notaFinal:g.sumFinal/g.count,
+    detalles:g.detalles
   };}).sort(function(a,b){return b.notaFinal-a.notaFinal;});
 
   if(evaluaciones.length>0){document.getElementById('winner-name').textContent=evaluaciones[0].grupo;document.getElementById('winner-nota').textContent=evaluaciones[0].notaFinal.toFixed(1);document.getElementById('winner-banner').classList.add('visible');}
@@ -141,7 +143,7 @@ function renderChart(data) {
   const labels=data.map(function(d){return d.grupo;}); const notas=data.map(function(d){return d.notaFinal;});
   const colors=notas.map(function(n){return n>=6.5?'#16a085':n>=5.5?'#27ae60':n>=4.5?'#d4ac0d':n>=3.5?'#e67e22':'#e74c3c';});
   if(chartInstance) chartInstance.destroy();
-  chartInstance=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Nota Final',data:notas,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return 'Nota: '+ctx.parsed.y.toFixed(1);}}}},scales:{y:{min:1,max:7,ticks:{stepSize:1},grid:{color:'#eee'}},x:{grid:{display:false},ticks:{maxRotation:35,font:{size:12}}}}}});
+  chartInstance=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Nota Final',data:notas,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var d=data[ctx.dataIndex];var lines=['Promedio: '+ctx.parsed.y.toFixed(1)];if(d.detalles&&d.detalles.length>1){d.detalles.forEach(function(e){lines.push((e.evaluador||'—')+': '+e.notaFinal.toFixed(1));});}return lines;}}}},scales:{y:{min:1,max:7,ticks:{stepSize:1},grid:{color:'#eee'}},x:{grid:{display:false},ticks:{maxRotation:35,font:{size:12}}}}}});
 }
 function renderTable(data) {
   const tbody=document.getElementById('ranking-body'); tbody.innerHTML='';
