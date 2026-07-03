@@ -79,8 +79,16 @@
 </nav>
 <div class="meta-section">
   <div class="meta-group">
-    <label for="nombre-grupo">Nombre del grupo / alumno</label>
-    <input type="text" id="nombre-grupo" placeholder="Ej: Grupo 3 — Cuenca del Maipo" />
+    <label for="nombre-grupo">Nombre del grupo</label>
+    <select id="nombre-grupo" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:8px 11px;font-size:.93rem;outline:none;transition:border-color .15s;background:#fff">
+      <option value="">-- Selecciona un equipo --</option>
+      <option value="Equipo 1">Equipo 1</option>
+      <option value="Equipo 2">Equipo 2</option>
+      <option value="Equipo 3">Equipo 3</option>
+      <option value="Equipo 4">Equipo 4</option>
+      <option value="Equipo 5">Equipo 5</option>
+      <option value="Equipo 6">Equipo 6</option>
+    </select>
   </div>
   <div class="meta-group">
     <label for="evaluador">Evaluador/a</label>
@@ -268,7 +276,7 @@ function resetForm() {
   document.querySelectorAll('.col-score').forEach(el=>{el.textContent='—'; el.classList.remove('has-val');});
   ['avg-tecnico','pct-tecnico','avg-forma','pct-forma'].forEach(id=>document.getElementById(id).textContent='—');
   ['r-avg-tec','r-pct-tec','r-avg-frm','r-pct-frm','r-final'].forEach(id=>document.getElementById(id).textContent='—');
-  document.getElementById('nombre-grupo').value=''; document.getElementById('evaluador').value='';
+  document.getElementById('nombre-grupo').selectedIndex=0; document.getElementById('evaluador').value='';
   document.getElementById('fecha-eval').valueAsDate=new Date();
   document.getElementById('results').classList.remove('visible');
   document.getElementById('alert-msg').classList.remove('visible');
