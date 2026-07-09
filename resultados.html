@@ -10,7 +10,9 @@
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--primary);padding-bottom:64px}
     header{background:var(--primary);color:#fff;padding:28px 40px;text-align:center;position:relative}
     header h1{font-size:1.45rem;font-weight:700} header p{margin-top:6px;font-size:.9rem;opacity:.9}
-    .arcadis-logo{position:absolute;top:24px;right:40px;height:32px;width:auto}
+    .arcadis-logo{position:absolute;top:24px;right:40px;height:40px}
+    header a{display:inline-block;transition:opacity .2s}
+    header a:hover{opacity:0.8}
     .top-nav{background:#000000;padding:0 40px;display:flex;gap:4px}
     .top-nav a{color:rgba(255,255,255,.72);text-decoration:none;padding:10px 18px;font-size:.84rem;font-weight:600;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;display:inline-block}
     .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:#EC6608}
@@ -50,10 +52,9 @@
 <header>
   <h1>Resultados — Gestión Hídrica</h1>
   <p>Ranking de evaluaciones recibidas</p>
-  <svg class="arcadis-logo" viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="0,35 10,10 20,35" fill="#EC6608"/>
-    <text x="28" y="28" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">ARCADIS</text>
-  </svg>
+  <a href="https://www.arcadis.com/es-cl" target="_blank" rel="noopener noreferrer" title="ARCADIS Chile">
+    <img src="https://www.arcadis.com/themes/custom/arcadis/logo.svg" alt="ARCADIS" class="arcadis-logo" onerror="this.style.display='none'">
+  </a>
 </header>
 <nav class="top-nav">
   <a href="index.html">&#128196; Evaluar</a>
