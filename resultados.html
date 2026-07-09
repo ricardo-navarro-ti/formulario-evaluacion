@@ -5,14 +5,14 @@
   <title>Resultados — Gestión Hídrica</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    :root{--primary:#2c3e50;--bg:#f5f6fa;--card:#fff;--border:#dde1e7;--muted:#7f8c8d;--gold:#f39c12;--silver:#95a5a6;--bronze:#ca6f1e}
+    :root{--primary:#EC6608;--bg:#f5f6fa;--card:#fff;--border:#dde1e7;--muted:#7f8c8d;--gold:#f39c12;--silver:#95a5a6;--bronze:#ca6f1e}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--primary);padding-bottom:64px}
-    header{background:var(--primary);color:#fff;padding:28px 40px;text-align:center}
-    header h1{font-size:1.45rem;font-weight:700} header p{margin-top:6px;font-size:.9rem;opacity:.75}
-    .top-nav{background:#1a252f;padding:0 40px;display:flex;gap:4px}
+    header{background:var(--primary);color:#fff;padding:28px 40px;text-align:center;position:relative}
+    header h1{font-size:1.45rem;font-weight:700} header p{margin-top:6px;font-size:.9rem;opacity:.9}
+    .top-nav{background:#000000;padding:0 40px;display:flex;gap:4px}
     .top-nav a{color:rgba(255,255,255,.72);text-decoration:none;padding:10px 18px;font-size:.84rem;font-weight:600;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;display:inline-block}
-    .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:#3498db}
+    .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:#EC6608}
     .container{max-width:960px;margin:0 auto;padding:24px 16px}
     .card{background:var(--card);border-radius:10px;padding:24px 28px;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:24px}
     .card h2{font-size:1rem;color:var(--primary);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--border)}
@@ -20,7 +20,7 @@
     .config-notice.visible{display:block}
     .actions-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px}
     .btn{padding:10px 22px;border-radius:8px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:filter .15s}
-    .btn-primary{background:var(--primary);color:#fff} .btn-primary:hover{filter:brightness(1.15)}
+    .btn-primary{background:var(--primary);color:#fff} .btn-primary:hover{background:#D15807}
     #status-msg{font-size:.85rem;color:var(--muted)}
     #loading{text-align:center;padding:40px;color:var(--muted);display:none} #loading.visible{display:block}
     .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
@@ -38,7 +38,7 @@
     .pos-1{background:var(--gold);color:#fff} .pos-2{background:var(--silver);color:#fff} .pos-3{background:var(--bronze);color:#fff} .pos-n{background:#ecf0f1;color:var(--muted)}
     .nota-chip{display:inline-block;padding:3px 12px;border-radius:20px;font-weight:800;font-size:.95rem}
     .nota-hi{background:#d5f5e3;color:#1e8449} .nota-ok{background:#d6eaf8;color:#1a5276} .nota-mid{background:#fdfad3;color:#7d6608} .nota-low{background:#fdf2f2;color:#c0392b}
-    #winner-banner{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;border-radius:10px;padding:18px 24px;margin-bottom:24px;display:none;align-items:center;gap:16px}
+    #winner-banner{background:linear-gradient(135deg,#EC6608,#D15807);color:#fff;border-radius:10px;padding:18px 24px;margin-bottom:24px;display:none;align-items:center;gap:16px}
     #winner-banner.visible{display:flex}
     .winner-trophy{font-size:2.5rem}
     .winner-text h3{font-size:1.05rem;opacity:.85;font-weight:600} .winner-text p{font-size:1.5rem;font-weight:800}
@@ -49,6 +49,7 @@
 <header>
   <h1>Resultados — Gestión Hídrica</h1>
   <p>Ranking de evaluaciones recibidas</p>
+  <img src="https://www.arcadis.com/themes/custom/arcadis/logo.svg" alt="ARCADIS" class="arcadis-logo" onerror="this.style.display='none'">
 </header>
 <nav class="top-nav">
   <a href="index.html">&#128196; Evaluar</a>
@@ -162,3 +163,4 @@ loadData();
 </script>
 </body>
 </html>
+
