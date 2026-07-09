@@ -6,15 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pauta de Evaluación — Gestión Hídrica</title>
   <style>
-    :root { --c1:#e74c3c;--c1-sel:#c0392b;--c2:#e67e22;--c2-sel:#ca6f1e;--c3:#d4ac0d;--c3-sel:#b7950b;--c4:#27ae60;--c4-sel:#1e8449;--c5:#16a085;--c5-sel:#0e6655;--primary:#2c3e50;--bg:#f5f6fa;--card:#fff;--border:#dde1e7;--text:#2c3e50;--muted:#7f8c8d }
+    :root { --c1:#e74c3c;--c1-sel:#c0392b;--c2:#e67e22;--c2-sel:#ca6f1e;--c3:#d4ac0d;--c3-sel:#b7950b;--c4:#27ae60;--c4-sel:#1e8449;--c5:#16a085;--c5-sel:#0e6655;--primary:#EC6608;--primary-dark:#D15807;--bg:#f5f6fa;--card:#fff;--border:#dde1e7;--text:#2c3e50;--muted:#7f8c8d;--arcadis-orange:#EC6608;--arcadis-black:#000000;--arcadis-teal:#008B8B;--arcadis-blue:#4682B4 }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding-bottom:64px}
-    header{background:var(--primary);color:#fff;padding:28px 40px;text-align:center}
+    header{background:var(--arcadis-orange);color:#fff;padding:28px 40px;text-align:center;position:relative}
     header h1{font-size:1.45rem;font-weight:700}
-    header p{margin-top:6px;font-size:.9rem;opacity:.75}
-    .top-nav{background:#1a252f;padding:0 40px;display:flex;gap:4px}
+    header p{margin-top:6px;font-size:.9rem;opacity:.9}
+    .arcadis-logo{position:absolute;top:24px;right:40px;height:40px}
+    .top-nav{background:var(--arcadis-black);padding:0 40px;display:flex;gap:4px}
     .top-nav a{color:rgba(255,255,255,.72);text-decoration:none;padding:10px 18px;font-size:.84rem;font-weight:600;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;display:inline-block}
-    .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:#3498db}
+    .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:var(--arcadis-orange)}
     .meta-section{max-width:960px;margin:28px auto 0;background:var(--card);border-radius:10px;padding:22px 28px;box-shadow:0 2px 10px rgba(0,0,0,.07);display:flex;gap:20px;flex-wrap:wrap}
     .meta-group{flex:1 1 190px}
     .meta-group label{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px}
@@ -23,7 +24,7 @@
     .alert{max-width:960px;margin:18px auto 0;background:#fdf2f2;border:1.5px solid #f5b7b1;color:#c0392b;border-radius:8px;padding:11px 16px;font-size:.88rem;display:none}
     .alert.visible{display:block}
     .section-card{max-width:960px;margin:24px auto 0;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)}
-    .section-header{background:var(--primary);color:#fff;padding:13px 22px;font-size:.97rem;font-weight:700;display:flex;align-items:center;gap:12px}
+    .section-header{background:var(--arcadis-orange);color:#fff;padding:13px 22px;font-size:.97rem;font-weight:700;display:flex;align-items:center;gap:12px}
     .section-header .badge{background:rgba(255,255,255,.18);padding:3px 11px;border-radius:20px;font-size:.78rem;font-weight:600}
     .table-wrapper{overflow-x:auto}
     .rubric-table{width:100%;border-collapse:collapse;min-width:700px}
@@ -50,8 +51,8 @@
     .totals-row .t-val{text-align:center;color:var(--primary);font-size:.97rem}
     .actions{max-width:960px;margin:28px auto 0;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
     .btn{padding:12px 30px;border-radius:8px;border:none;font-size:.97rem;font-weight:700;cursor:pointer;transition:background .15s,filter .15s}
-    .btn-primary{background:var(--primary);color:#fff} .btn-primary:hover{filter:brightness(1.15)}
-    .btn-outline{background:#fff;color:var(--primary);border:2px solid var(--primary)} .btn-outline:hover{background:#f0f2f5}
+    .btn-primary{background:var(--arcadis-orange);color:#fff} .btn-primary:hover{background:var(--primary-dark)}
+    .btn-outline{background:#fff;color:var(--arcadis-orange);border:2px solid var(--arcadis-orange)} .btn-outline:hover{background:#fff5f0}
     .btn-success{background:#27ae60;color:#fff} .btn-success:hover{filter:brightness(1.12)} .btn-success:disabled{opacity:.6;cursor:default;filter:none}
     #results{max-width:960px;margin:28px auto 0;background:var(--card);border-radius:10px;padding:28px 32px;box-shadow:0 2px 10px rgba(0,0,0,.07);display:none}
     #results.visible{display:block}
@@ -60,7 +61,7 @@
     .result-box{background:#f5f6fa;border-radius:9px;padding:16px 12px;text-align:center}
     .result-box .r-lbl{font-size:.73rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin-bottom:8px}
     .result-box .r-val{font-size:2rem;font-weight:800;color:var(--primary)}
-    .result-box.final-box{background:var(--primary)} .result-box.final-box .r-lbl{color:rgba(255,255,255,.7)} .result-box.final-box .r-val{color:#fff;font-size:2.6rem}
+    .result-box.final-box{background:var(--arcadis-orange)} .result-box.final-box .r-lbl{color:rgba(255,255,255,.9)} .result-box.final-box .r-val{color:#fff;font-size:2.6rem}
     .submit-area{margin-top:22px;text-align:center}
     #submit-msg{display:none;margin-top:10px;font-size:.88rem;padding:8px 16px;border-radius:6px}
     #submit-msg.visible{display:inline-block} #submit-msg.ok{background:#d5f5e3;color:#1e8449} #submit-msg.err{background:#fdf2f2;color:#c0392b} #submit-msg.sending{background:#eaf2fb;color:#2471a3}
@@ -73,6 +74,7 @@
 <header>
   <h1>Pauta de Evaluación — Gestión Hídrica</h1>
   <p>Evaluación de propuesta grupal — Escala 1 a 7</p>
+  <img src="https://www.arcadis.com/themes/custom/arcadis/logo.svg" alt="ARCADIS" class="arcadis-logo" onerror="this.style.display='none'">
 </header>
 <nav class="top-nav">
   <a href="index.html" class="active">&#128196; Evaluar</a>
