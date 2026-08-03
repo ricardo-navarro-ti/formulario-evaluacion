@@ -12,8 +12,7 @@
     header{background:var(--arcadis-orange);color:#fff;padding:28px 40px;text-align:center;position:relative}
     header h1{font-size:1.45rem;font-weight:700}
     header p{margin-top:6px;font-size:.9rem;opacity:.9}
-    .arcadis-logo{position:absolute;top:20px;right:40px;height:45px;cursor:pointer;transition:opacity .2s}
-    .arcadis-logo:hover{opacity:0.85}
+    .arcadis-logo{position:absolute;top:24px;right:40px;height:40px}
     .top-nav{background:var(--arcadis-black);padding:0 40px;display:flex;gap:4px}
     .top-nav a{color:rgba(255,255,255,.72);text-decoration:none;padding:10px 18px;font-size:.84rem;font-weight:600;border-bottom:3px solid transparent;transition:color .15s,border-color .15s;display:inline-block}
     .top-nav a:hover,.top-nav a.active{color:#fff;border-bottom-color:var(--arcadis-orange)}
@@ -75,15 +74,7 @@
 <header>
   <h1>Pauta de Evaluación — Gestión Hídrica</h1>
   <p>Evaluación de propuesta grupal — Escala 1 a 7</p>
-  <a href="https://www.arcadis.com/es-cl" target="_blank" rel="noopener noreferrer" title="ARCADIS Chile">
-    <svg class="arcadis-logo" viewBox="0 0 220 50" xmlns="http://www.w3.org/2000/svg">
-      <g>
-        <path d="M 12 42 Q 4 26 12 12 Q 18 4 24 12 Q 26 16 24 22 L 16 38 Z" fill="#EC6608"/>
-        <ellipse cx="18" cy="15" rx="4" ry="3.5" fill="#EC6608"/>
-      </g>
-      <text x="38" y="32" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#000000" letter-spacing="0.5">ARCADIS</text>
-    </svg>
-  </a>
+  <img src="https://www.arcadis.com/themes/custom/arcadis/logo.svg" alt="ARCADIS" class="arcadis-logo" onerror="this.style.display='none'">
 </header>
 <nav class="top-nav">
   <a href="index.html" class="active">&#128196; Evaluar</a>
@@ -252,6 +243,16 @@ function updateLiveTotals() {
 }
 function calcularNota() {
   const alertEl=document.getElementById('alert-msg');
+  const grupo=document.getElementById('nombre-grupo').value;
+  const evaluador=document.getElementById('evaluador').value;
+  if(!grupo || grupo==='' || grupo.includes('Selecciona')){
+    alertEl.textContent='⚠️ Falta completar el campo "Nombre del Grupo".';
+    alertEl.classList.add('visible'); alertEl.scrollIntoView({behavior:'smooth',block:'center'}); return;
+  }
+  if(!evaluador || evaluador==='' || evaluador.includes('Selecciona')){
+    alertEl.textContent='⚠️ Falta completar el campo "Evaluador/a".';
+    alertEl.classList.add('visible'); alertEl.scrollIntoView({behavior:'smooth',block:'center'}); return;
+  }
   const allCriterios=[...CRITERIOS_TECNICOS,...CRITERIOS_FORMA];
   const missing=allCriterios.filter(c=>selections[c.id]===undefined);
   if(missing.length>0){
@@ -266,10 +267,8 @@ function calcularNota() {
   document.getElementById('r-avg-frm').textContent=fmt(avgFrm);
   document.getElementById('r-pct-frm').textContent=fmt(pctFrm);
   document.getElementById('r-final').textContent=notaFinal.toFixed(1);
-  const grupo=document.getElementById('nombre-grupo').value.trim();
-  const eval_=document.getElementById('evaluador').value.trim();
   const fecha=document.getElementById('fecha-eval').value;
-  const partes=[]; if(grupo) partes.push('Grupo: '+grupo); if(eval_) partes.push('Evaluador/a: '+eval_); if(fecha) partes.push('Fecha: '+fecha);
+  const partes=[]; if(grupo) partes.push('Grupo: '+grupo); if(evaluador) partes.push('Evaluador/a: '+evaluador); if(fecha) partes.push('Fecha: '+fecha);
   document.getElementById('result-meta').textContent=partes.join('  |  ');
   const btnG=document.getElementById('btn-guardar'); btnG.disabled=false; btnG.textContent='💾 Guardar en Google Sheets';
   const msgEl=document.getElementById('submit-msg'); msgEl.className=''; msgEl.textContent='';
@@ -277,6 +276,16 @@ function calcularNota() {
 }
 async function submitEvaluacion() {
   if(APPS_SCRIPT_URL===''){showSubmitMsg('err','⚠️ Configura primero la URL del Apps Script (ver GUIA-PUBLICACION.md).'); return;}
+  const grupo=document.getElementById('nombre-grupo').value;
+  const evaluador=document.getElementById('evaluador').value;
+  if(!grupo || grupo==='' || grupo.includes('Selecciona')){
+    showSubmitMsg('err','⚠️ Falta completar el campo "Nombre del Grupo".');
+    return;
+  }
+  if(!evaluador || evaluador==='' || evaluador.includes('Selecciona')){
+    showSubmitMsg('err','⚠️ Falta completar el campo "Evaluador/a".');
+    return;
+  }
   const allCriterios=[...CRITERIOS_TECNICOS,...CRITERIOS_FORMA];
   if(allCriterios.some(c=>selections[c.id]===undefined)){showSubmitMsg('err','⚠️ Calcula la nota antes de guardar.'); return;}
   const tecnicoScores=CRITERIOS_TECNICOS.map(c=>LEVELS[selections[c.id]].value);
@@ -284,7 +293,7 @@ async function submitEvaluacion() {
   const avgTec=tecnicoScores.reduce((a,b)=>a+b,0)/tecnicoScores.length;
   const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
   const notaFinal=avgTec*0.6+avgFrm*0.4;
-  const payload={grupo:document.getElementById('nombre-grupo').value.trim()||'(Sin nombre)',evaluador:document.getElementById('evaluador').value.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
+  const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
   showSubmitMsg('sending','⏳ Guardando...');
   const btnG=document.getElementById('btn-guardar'); btnG.disabled=true;
   try{

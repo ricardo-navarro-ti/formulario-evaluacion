@@ -30,6 +30,19 @@ function doPost(e) {
       sheet.setFrozenRows(1);
     }
     const data = JSON.parse(e.postData.contents);
+    
+    if (!data.grupo || data.grupo.trim() === '' || data.grupo.includes('Selecciona')) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: 'Falta completar el campo "Nombre del Grupo".' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    if (!data.evaluador || data.evaluador.trim() === '' || data.evaluador.includes('Selecciona')) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'error', message: 'Falta completar el campo "Evaluador/a".' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
     sheet.appendRow([
       new Date().toLocaleString('es-CL'),
       data.grupo, data.evaluador, data.fecha,
