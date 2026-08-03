@@ -43,6 +43,28 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
     
+    // Validar que el evaluador no haya evaluado este grupo previamente
+    if (sheet.getLastRow() > 1) {
+      const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, HEADERS.length);
+      const allRows = dataRange.getValues();
+      const grupoCol = 1; // Columna B (índice 1)
+      const evaluadorCol = 2; // Columna C (índice 2)
+      
+      for (let i = 0; i < allRows.length; i++) {
+        const grupoExistente = String(allRows[i][grupoCol]).trim();
+        const evaluadorExistente = String(allRows[i][evaluadorCol]).trim();
+        
+        if (grupoExistente === data.grupo.trim() && evaluadorExistente === data.evaluador.trim()) {
+          return ContentService
+            .createTextOutput(JSON.stringify({ 
+              status: 'error', 
+              message: 'El evaluador "' + data.evaluador + '" ya evaluó al grupo "' + data.grupo + '". Cada evaluador solo puede evaluar a un grupo una vez.' 
+            }))
+            .setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+    }
+    
     sheet.appendRow([
       new Date().toLocaleString('es-CL'),
       data.grupo, data.evaluador, data.fecha,
