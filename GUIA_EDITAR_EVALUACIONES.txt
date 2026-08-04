@@ -1,0 +1,204 @@
+═══════════════════════════════════════════════════════════════════════════════
+  ✅ NUEVA FUNCIONALIDAD: EDITAR Y ELIMINAR EVALUACIONES
+═══════════════════════════════════════════════════════════════════════════════
+
+Commit: f35b39a
+Mensaje: "feat: Agregar funcionalidad para editar y eliminar evaluaciones"
+Estado: ✅ Subido a GitHub y desplegándose automáticamente
+
+═══════════════════════════════════════════════════════════════════════════════
+  📋 ARCHIVOS NUEVOS CREADOS:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ editar.html
+   • Nueva página para administrar evaluaciones
+   • Lista todas las evaluaciones guardadas
+   • Botones "Editar" y "Eliminar" para cada registro
+   • Navegación integrada con el resto del sistema
+
+═══════════════════════════════════════════════════════════════════════════════
+  🔧 ARCHIVOS MODIFICADOS:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ apps-script.js
+   • Agregada acción "delete" para eliminar registros
+   • Agregada acción "update" para actualizar registros
+   • Modificada validación de duplicados (solo al crear, no al actualizar)
+
+✅ index.html
+   • Agregado enlace "✏️ Editar Evaluaciones" en navegación
+   • Detecta modo edición desde parámetros URL
+   • Precarga datos cuando viene en modo edición
+   • Envía "update" al backend cuando está editando
+   • Redirige a editar.html después de actualizar
+
+✅ resultados.html
+   • Agregado enlace "✏️ Editar Evaluaciones" en navegación
+
+═══════════════════════════════════════════════════════════════════════════════
+  🎯 CÓMO USAR LA NUEVA FUNCIONALIDAD:
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. ACCEDER A LA PÁGINA DE EDICIÓN                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Opción A: Desde la navegación
+  → Abre cualquier página (index.html, resultados.html)
+  → Clic en "✏️ Editar Evaluaciones"
+
+Opción B: Directamente
+  → Abre: https://ricardo-navarro-ti.github.io/formulario-evaluacion/editar.html
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. EDITAR UNA EVALUACIÓN                                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. En la página "Editar Evaluaciones", verás una tabla con todas las evaluaciones
+2. Busca la evaluación que quieres modificar
+3. Clic en el botón "✏️ Editar" de esa fila
+4. Se abrirá el formulario de evaluación con los datos precargados
+5. El título cambiará a "✏️ Editar Evaluación"
+6. Verás un mensaje: "📝 Modo Edición: Modifica los criterios..."
+7. Modifica los criterios que necesites cambiar
+8. Presiona "Calcular Nota Final"
+9. Presiona "💾 Actualizar Evaluación"
+10. ✅ La evaluación se actualizará en Google Sheets
+11. Serás redirigido automáticamente a la lista de evaluaciones
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. ELIMINAR UNA EVALUACIÓN                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. En la página "Editar Evaluaciones", verás la tabla de evaluaciones
+2. Busca la evaluación que quieres eliminar
+3. Clic en el botón "🗑️ Eliminar" de esa fila
+4. Confirma la eliminación en el diálogo que aparece
+5. ✅ La evaluación se eliminará de Google Sheets
+6. La página se recargará automáticamente
+
+⚠️ ATENCIÓN: La eliminación es permanente y no se puede deshacer
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 4. VALIDACIONES EN MODO EDICIÓN                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+✅ Al editar, NO se valida duplicado de grupo+evaluador
+   • Puedes mantener el mismo grupo y evaluador
+   • Solo se actualiza el registro existente
+
+✅ Campos obligatorios siguen validándose
+   • Grupo debe estar seleccionado
+   • Evaluador debe estar seleccionado
+   • Todos los criterios deben evaluarse
+
+✅ Verificación de duplicados en frontend
+   • Si intentas cambiar grupo o evaluador a una combinación existente
+   • El sistema te alertará al calcular nota
+
+═══════════════════════════════════════════════════════════════════════════════
+  🔄 FLUJO TÉCNICO:
+═══════════════════════════════════════════════════════════════════════════════
+
+EDITAR:
+1. editar.html → Usuario clic en "Editar"
+2. Redirige a: index.html?modo=editar&rowIndex=X&grupo=Y&evaluador=Z&fecha=W
+3. index.html detecta parámetros, activa modo edición
+4. Precarga: grupo, evaluador, fecha
+5. Usuario modifica criterios
+6. Calcula nota
+7. Guarda → Envía payload con {action:'update', rowIndex:X, ...datos}
+8. Backend actualiza fila X en Google Sheets
+9. Redirige a editar.html
+
+ELIMINAR:
+1. editar.html → Usuario clic en "Eliminar"
+2. Confirmación del navegador
+3. Envía payload: {action:'delete', rowIndex:X}
+4. Backend ejecuta sheet.deleteRow(X)
+5. Recarga editar.html
+
+═══════════════════════════════════════════════════════════════════════════════
+  ⚠️ ACCIÓN REQUERIDA: ACTUALIZAR BACKEND
+═══════════════════════════════════════════════════════════════════════════════
+
+El código de apps-script.js fue modificado para soportar edición y eliminación.
+Debes actualizar Google Apps Script siguiendo estos pasos:
+
+1. Abre tu Google Sheet → Extensiones → Apps Script
+2. Copia TODO el contenido de apps-script.js (Ctrl+A, Ctrl+C)
+3. Pega en el editor de Google Apps Script (Ctrl+A, Ctrl+V)
+4. Guarda (Ctrl+S)
+5. IMPORTANTE: Crear nueva versión
+   → Implementar → Administrar implementaciones
+   → ✏️ Editar → Nueva versión → Implementar
+
+⚠️ Sin el paso 5, las funciones de editar y eliminar NO funcionarán
+
+═══════════════════════════════════════════════════════════════════════════════
+  📊 CARACTERÍSTICAS:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Tabla responsive con todas las evaluaciones
+✅ Botones de acción por fila (Editar / Eliminar)
+✅ Confirmación antes de eliminar
+✅ Mensajes de éxito/error
+✅ Redirección automática después de actualizar
+✅ Modo edición visual (cambia título y botones)
+✅ Precarga de datos en el formulario
+✅ Validaciones completas en ambos modos (crear/editar)
+✅ Eliminación segura con confirmación
+
+═══════════════════════════════════════════════════════════════════════════════
+  🚀 DESPLIEGUE:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Frontend (index.html, editar.html, resultados.html):
+   • Push a GitHub: ✅ Completado (commit f35b39a)
+   • GitHub Actions: ~1-2 minutos
+   • Disponible en: https://ricardo-navarro-ti.github.io/formulario-evaluacion/
+
+⚠️ Backend (apps-script.js):
+   • Código local: ✅ Actualizado
+   • Google Apps Script: ⚠️ PENDIENTE (actualización manual requerida)
+   • Sin actualizar backend, editar/eliminar NO funcionará
+
+═══════════════════════════════════════════════════════════════════════════════
+  🧪 PROBAR LA FUNCIONALIDAD:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Espera 1-2 minutos para que GitHub Pages se actualice
+2. Actualiza apps-script.js en Google Apps Script (ver instrucciones arriba)
+3. Abre: https://ricardo-navarro-ti.github.io/formulario-evaluacion/editar.html
+4. Verás la lista de evaluaciones
+5. Prueba editar una evaluación
+6. Prueba eliminar una evaluación (cuidado, es permanente)
+
+═══════════════════════════════════════════════════════════════════════════════
+  📝 NAVEGACIÓN ACTUALIZADA:
+═══════════════════════════════════════════════════════════════════════════════
+
+Todas las páginas ahora tienen 3 enlaces en el menú superior:
+
+📋 Evaluar → index.html (Crear nuevas evaluaciones)
+🏆 Ver Resultados → resultados.html (Ver ranking)
+✏️ Editar Evaluaciones → editar.html (Administrar evaluaciones)
+
+═══════════════════════════════════════════════════════════════════════════════
+  📌 RESUMEN:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Nueva página "editar.html" para administrar evaluaciones
+✅ Botones "Editar" y "Eliminar" para cada evaluación
+✅ Modo edición en index.html (detecta parámetros URL)
+✅ Backend con soporte para update y delete
+✅ Navegación integrada en todas las páginas
+✅ Mensajes claros de éxito/error
+✅ Confirmación antes de eliminar
+✅ Redirección automática después de actualizar
+
+⚠️ Recuerda actualizar Google Apps Script para activar la funcionalidad
+⚠️ La eliminación es permanente (no hay papelera de reciclaje)
+⚠️ Espera 1-2 minutos para que GitHub Pages se actualice
+
+═══════════════════════════════════════════════════════════════════════════════
