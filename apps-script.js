@@ -31,6 +31,29 @@ function doPost(e) {
     }
     const data = JSON.parse(e.postData.contents);
     
+    // Acción: Eliminar
+    if (data.action === 'delete' && data.rowIndex) {
+      sheet.deleteRow(data.rowIndex);
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación eliminada.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Acción: Actualizar
+    if (data.action === 'update' && data.rowIndex) {
+      sheet.getRange(data.rowIndex, 1, 1, HEADERS.length).setValues([[
+        new Date().toLocaleString('es-CL'),
+        data.grupo, data.evaluador, data.fecha,
+        ...data.tecnico,
+        ...data.forma,
+        data.avgTecnico, data.avgForma, data.notaFinal
+      ]]);
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación actualizada.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Acción: Crear (por defecto)
     if (!data.grupo || data.grupo.trim() === '' || data.grupo.includes('Selecciona')) {
       return ContentService
         .createTextOutput(JSON.stringify({ status: 'error', message: 'Falta completar el campo "Nombre del Grupo".' }))
@@ -43,7 +66,7 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // Verificar si ya existe una evaluación del mismo evaluador para el mismo grupo
+    // Verificar duplicados solo al crear (no al actualizar)
     const lastRow = sheet.getLastRow();
     if (lastRow > 1) {
       const dataRange = sheet.getRange(2, 1, lastRow - 1, HEADERS.length);

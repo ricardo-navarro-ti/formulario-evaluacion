@@ -1,0 +1,199 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnóstico de Red</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root{--primary:#EC6608;--success:#27ae60;--warning:#f39c12;--danger:#e74c3c;--info:#3498db;--bg:#f5f6fa;--card:#fff;--border:#dde1e7;--muted:#7f8c8d}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#2c3e50;padding-bottom:64px}
+    header{background:linear-gradient(135deg,var(--primary),#D15807);color:#fff;padding:32px 40px;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+    header h1{font-size:1.8rem;font-weight:700;margin-bottom:8px}
+    header p{font-size:1rem;opacity:.9}
+    .container{max-width:1200px;margin:0 auto;padding:32px 24px}
+    .card{background:var(--card);border-radius:12px;padding:28px 32px;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:28px;border:1px solid var(--border)}
+    .card h2{font-size:1.25rem;color:var(--primary);margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px}
+    .info-panel{background:#f8f9fa;border-radius:8px;padding:16px 20px;margin-bottom:24px;border-left:4px solid var(--info)}
+    .info-panel h3{font-size:.95rem;color:var(--info);margin-bottom:8px;font-weight:600}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;font-size:.88rem}
+    .info-item{display:flex;justify-content:space-between}
+    .info-label{color:var(--muted);font-weight:600}
+    .info-value{color:#2c3e50;font-weight:700}
+    .btn{padding:14px 32px;border-radius:8px;border:none;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:10px}
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(236,102,8,.3)}
+    .btn-primary:hover:not(:disabled){background:#D15807;transform:translateY(-2px);box-shadow:0 6px 16px rgba(236,102,8,.4)}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed}
+    .btn-secondary{background:#ecf0f1;color:#2c3e50}
+    .btn-secondary:hover:not(:disabled){background:#dde1e7}
+    .actions-bar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:28px}
+    .status-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;font-size:.85rem;font-weight:600}
+    .status-idle{background:#f8f9fa;color:var(--muted)}
+    .status-running{background:#e8f5e9;color:var(--success);animation:pulse 1.5s ease-in-out infinite}
+    .status-complete{background:#e3f2fd;color:var(--info)}
+    .status-error{background:#ffebee;color:var(--danger)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+    .test-section{margin-bottom:24px}
+    .test-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .test-title{font-size:1.05rem;font-weight:700;color:#2c3e50}
+    .test-status{font-size:.8rem;padding:4px 12px;border-radius:12px;font-weight:600}
+    .test-pending{background:#f8f9fa;color:var(--muted)}
+    .test-running{background:#fff3cd;color:#856404}
+    .test-success{background:#d4edda;color:#155724}
+    .test-failed{background:#f8d7da;color:#721c24}
+    .progress-bar{height:8px;background:#ecf0f1;border-radius:4px;overflow:hidden;margin-bottom:12px}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--success),var(--info));width:0%;transition:width .3s ease}
+    .results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:20px}
+    .result-card{background:#f8f9fa;border-radius:10px;padding:20px;border:2px solid var(--border);text-align:center}
+    .result-label{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;font-weight:600}
+    .result-value{font-size:2.2rem;font-weight:800;color:var(--primary);margin-bottom:8px}
+    .result-unit{font-size:1rem;color:var(--muted)}
+    .result-rating{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:12px;font-size:.8rem;font-weight:700}
+    .rating-excellent{background:#d4edda;color:#155724}
+    .rating-good{background:#d1ecf1;color:#0c5460}
+    .rating-fair{background:#fff3cd;color:#856404}
+    .rating-poor{background:#f8d7da;color:#721c24}
+    .chart-container{position:relative;height:300px;margin-top:20px}
+    .server-list{list-style:none;margin-top:16px}
+    .server-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f8f9fa;border-radius:8px;margin-bottom:8px;font-size:.9rem}
+    .server-name{font-weight:600;color:#2c3e50}
+    .server-latency{font-weight:700;color:var(--success)}
+    .server-status{width:10px;height:10px;border-radius:50%;margin-right:10px}
+    .status-ok{background:var(--success)}
+    .status-slow{background:var(--warning)}
+    #report-summary{display:none}
+    #report-summary.visible{display:block}
+    .summary-header{background:linear-gradient(135deg,#27ae60,#16a085);color:#fff;border-radius:10px;padding:24px 32px;margin-bottom:28px;text-align:center}
+    .summary-header h2{font-size:1.5rem;margin-bottom:8px;border:none;color:#fff}
+    .summary-score{font-size:3.5rem;font-weight:900;margin:16px 0}
+    .summary-grade{font-size:1.2rem;opacity:.9}
+    @media print{body{background:#fff}.actions-bar,.btn{display:none!important}.card{box-shadow:none;border:1px solid #ddd;page-break-inside:avoid}}
+    @media(max-width:768px){header{padding:20px 16px}header h1{font-size:1.4rem}.container{padding:20px 12px}.card{padding:20px 16px}.result-value{font-size:1.8rem}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚡ Diagnóstico de Red</h1>
+    <p>Evaluación de Performance y Conectividad</p>
+  </header>
+  <div class="container">
+    <div class="info-panel">
+      <h3>📊 Información del Sistema</h3>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">PC:</span><span class="info-value" id="pc-name">—</span></div>
+        <div class="info-item"><span class="info-label">IP Local:</span><span class="info-value" id="local-ip">Detectando...</span></div>
+        <div class="info-item"><span class="info-label">Navegador:</span><span class="info-value" id="browser-info">—</span></div>
+        <div class="info-item"><span class="info-label">Fecha:</span><span class="info-value" id="test-date">—</span></div>
+      </div>
+    </div>
+    <div class="actions-bar">
+      <button class="btn btn-primary" id="start-test" onclick="startAllTests()">▶ Iniciar Diagnóstico</button>
+      <button class="btn btn-secondary" onclick="window.print()" id="print-btn" style="display:none">🖨️ Imprimir</button>
+      <span class="status-badge status-idle" id="global-status"><span>●</span> Listo</span>
+    </div>
+    <div class="card">
+      <h2>🌐 Latencia (Ping)</h2>
+      <div class="test-section">
+        <div class="test-header"><span class="test-title">Midiendo tiempos de respuesta...</span><span class="test-status test-pending" id="latency-status">Pendiente</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="latency-progress"></div></div>
+        <div id="latency-results" style="display:none">
+          <div class="results-grid">
+            <div class="result-card"><div class="result-label">Promedio</div><div class="result-value" id="avg-latency">—</div><div class="result-unit">ms</div><div class="result-rating rating-good" id="latency-rating">—</div></div>
+            <div class="result-card"><div class="result-label">Mejor</div><div class="result-value" id="min-latency">—</div><div class="result-unit">ms</div></div>
+            <div class="result-card"><div class="result-label">Peor</div><div class="result-value" id="max-latency">—</div><div class="result-unit">ms</div></div>
+          </div>
+          <ul class="server-list" id="server-list"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📦 Pérdida de Paquetes</h2>
+      <div class="test-section">
+        <div class="test-header"><span class="test-title">Enviando 600 paquetes (1 min)...</span><span class="test-status test-pending" id="packetloss-status">Pendiente</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="packetloss-progress"></div></div>
+        <div id="packetloss-results" style="display:none">
+          <div class="results-grid">
+            <div class="result-card"><div class="result-label">Pérdida</div><div class="result-value" id="packet-loss-pct">—</div><div class="result-unit">%</div><div class="result-rating rating-good" id="packetloss-rating">—</div></div>
+            <div class="result-card"><div class="result-label">Enviados</div><div class="result-value" id="packets-sent">—</div><div class="result-unit">paq</div></div>
+            <div class="result-card"><div class="result-label">Perdidos</div><div class="result-value" id="packets-lost">—</div><div class="result-unit">paq</div></div>
+          </div>
+          <div style="margin-top:20px;padding:16px;background:#f8f9fa;border-radius:8px">
+            <div style="font-size:.9rem;color:var(--muted);margin-bottom:8px;font-weight:600">Estabilidad</div>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Exitosos:</span><span class="info-value" id="packets-success">—</span></div>
+              <div class="info-item"><span class="info-label">Jitter:</span><span class="info-value" id="avg-jitter">—</span></div>
+              <div class="info-item"><span class="info-label">Estado:</span><span class="info-value" id="stability-status">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>⬇️ Descarga</h2>
+      <div class="test-section">
+        <div class="test-header"><span class="test-title">Descargando archivos...</span><span class="test-status test-pending" id="download-status">Pendiente</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="download-progress"></div></div>
+        <div id="download-results" style="display:none">
+          <div class="results-grid">
+            <div class="result-card"><div class="result-label">Velocidad</div><div class="result-value" id="download-speed">—</div><div class="result-unit">Mbps</div><div class="result-rating rating-good" id="download-rating">—</div></div>
+            <div class="result-card"><div class="result-label">Datos</div><div class="result-value" id="download-size">—</div><div class="result-unit">MB</div></div>
+            <div class="result-card"><div class="result-label">Tiempo</div><div class="result-value" id="download-time">—</div><div class="result-unit">seg</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>⬆️ Subida</h2>
+      <div class="test-section">
+        <div class="test-header"><span class="test-title">Enviando datos...</span><span class="test-status test-pending" id="upload-status">Pendiente</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="upload-progress"></div></div>
+        <div id="upload-results" style="display:none">
+          <div class="results-grid">
+            <div class="result-card"><div class="result-label">Velocidad</div><div class="result-value" id="upload-speed">—</div><div class="result-unit">Mbps</div><div class="result-rating rating-good" id="upload-rating">—</div></div>
+            <div class="result-card"><div class="result-label">Datos</div><div class="result-value" id="upload-size">—</div><div class="result-unit">MB</div></div>
+            <div class="result-card"><div class="result-label">Tiempo</div><div class="result-value" id="upload-time">—</div><div class="result-unit">seg</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="chart-card" style="display:none">
+      <h2>📈 Gráfico de Latencia</h2>
+      <div class="chart-container"><canvas id="latencyChart"></canvas></div>
+    </div>
+    <div class="card" id="report-summary">
+      <div class="summary-header">
+        <h2>✅ Diagnóstico Completado</h2>
+        <div class="summary-score" id="overall-score">—</div>
+        <div class="summary-grade" id="overall-grade">—</div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item"><span class="info-label">Estado:</span><span class="info-value" id="final-status">—</span></div>
+        <div class="info-item"><span class="info-label">Latencia:</span><span class="info-value" id="final-latency">—</span></div>
+        <div class="info-item"><span class="info-label">Pérdida:</span><span class="info-value" id="final-packetloss">—</span></div>
+        <div class="info-item"><span class="info-label">Descarga:</span><span class="info-value" id="final-download">—</span></div>
+        <div class="info-item"><span class="info-label">Subida:</span><span class="info-value" id="final-upload">—</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+let testResults={pcName:'',localIP:'',timestamp:'',browser:'',latency:{avg:0,min:0,max:0,servers:[]},packetLoss:{lossPercentage:0,packetsSent:0,packetsLost:0,packetsSuccess:0,avgJitter:0,stability:''},download:{speedMbps:0,sizeMB:0,timeSeconds:0},upload:{speedMbps:0,sizeMB:0,timeSeconds:0}};
+window.addEventListener('DOMContentLoaded',function(){initSystemInfo()});
+function initSystemInfo(){testResults.pcName='PC-'+Math.random().toString(36).substr(2,6).toUpperCase();document.getElementById('pc-name').textContent=testResults.pcName;const ua=navigator.userAgent;let browserName='Desconocido';if(ua.indexOf('Firefox')>-1)browserName='Firefox';else if(ua.indexOf('Chrome')>-1)browserName='Chrome';else if(ua.indexOf('Safari')>-1)browserName='Safari';else if(ua.indexOf('Edge')>-1)browserName='Edge';testResults.browser=browserName;document.getElementById('browser-info').textContent=browserName;const now=new Date();testResults.timestamp=now.toLocaleString('es-CL');document.getElementById('test-date').textContent=now.toLocaleDateString('es-CL')+' '+now.toLocaleTimeString('es-CL');detectLocalIP()}
+function detectLocalIP(){const pc=new RTCPeerConnection({iceServers:[]});pc.createDataChannel('');pc.createOffer().then(offer=>pc.setLocalDescription(offer));pc.onicecandidate=event=>{if(!event||!event.candidate)return;const candidate=event.candidate.candidate;const ipRegex=/([0-9]{1,3}\.){3}[0-9]{1,3}/;const match=ipRegex.exec(candidate);if(match){testResults.localIP=match[0];document.getElementById('local-ip').textContent=match[0];pc.close()}}}
+async function startAllTests(){document.getElementById('start-test').disabled=true;updateGlobalStatus('running','Ejecutando...');try{await testLatency();await testPacketLoss();await testDownloadSpeed();await testUploadSpeed();showFinalSummary();updateGlobalStatus('complete','Completado');document.getElementById('print-btn').style.display='inline-flex'}catch(error){console.error(error);updateGlobalStatus('error','Error')}}
+function updateGlobalStatus(status,message){const badge=document.getElementById('global-status');badge.className='status-badge status-'+status;badge.innerHTML='<span>●</span> '+message}
+async function testLatency(){const statusEl=document.getElementById('latency-status');const progressEl=document.getElementById('latency-progress');const resultsEl=document.getElementById('latency-results');statusEl.textContent='Ejecutando...';statusEl.className='test-status test-running';const servers=[{name:'Google',url:'https://dns.google/resolve?name=google.com&type=A'},{name:'Cloudflare',url:'https://cloudflare-dns.com/dns-query?name=cloudflare.com&type=A'},{name:'AWS',url:'https://aws.amazon.com/'},{name:'Azure',url:'https://azure.microsoft.com/'},{name:'GitHub',url:'https://api.github.com/'}];const latencies=[];const serverResults=[];for(let i=0;i<servers.length;i++){const server=servers[i];progressEl.style.width=((i+1)/servers.length*100)+'%';try{const latency=await measureLatency(server.url);latencies.push(latency);serverResults.push({name:server.name,latency:latency,status:latency<100?'ok':latency<200?'slow':'error'})}catch(error){serverResults.push({name:server.name,latency:-1,status:'error'})}}const validLatencies=latencies.filter(l=>l>0);const avgLatency=validLatencies.length>0?validLatencies.reduce((a,b)=>a+b,0)/validLatencies.length:0;const minLatency=validLatencies.length>0?Math.min(...validLatencies):0;const maxLatency=validLatencies.length>0?Math.max(...validLatencies):0;testResults.latency={avg:avgLatency,min:minLatency,max:maxLatency,servers:serverResults};document.getElementById('avg-latency').textContent=avgLatency.toFixed(0);document.getElementById('min-latency').textContent=minLatency.toFixed(0);document.getElementById('max-latency').textContent=maxLatency.toFixed(0);const rating=getRatingForLatency(avgLatency);const ratingEl=document.getElementById('latency-rating');ratingEl.textContent=rating.text;ratingEl.className='result-rating rating-'+rating.class;const serverList=document.getElementById('server-list');serverList.innerHTML='';serverResults.forEach(server=>{const li=document.createElement('li');li.className='server-item';li.innerHTML='<div style="display:flex;align-items:center"><span class="server-status status-'+server.status+'"></span><span class="server-name">'+server.name+'</span></div><span class="server-latency">'+(server.latency>0?server.latency.toFixed(0)+' ms':'Error')+'</span>';serverList.appendChild(li)});resultsEl.style.display='block';statusEl.textContent='Completado';statusEl.className='test-status test-success';createLatencyChart(serverResults)}
+async function measureLatency(url){const start=performance.now();try{await fetch(url,{method:'HEAD',mode:'no-cors',cache:'no-cache'});const end=performance.now();return end-start}catch(error){return-1}}
+function getRatingForLatency(latency){if(latency<50)return{text:'Excelente',class:'excellent'};if(latency<100)return{text:'Buena',class:'good'};if(latency<200)return{text:'Regular',class:'fair'};return{text:'Deficiente',class:'poor'}}
+async function testPacketLoss(){const statusEl=document.getElementById('packetloss-status');const progressEl=document.getElementById('packetloss-progress');const resultsEl=document.getElementById('packetloss-results');statusEl.textContent='Ejecutando...';statusEl.className='test-status test-running';const totalPackets=600;const testUrl='https://www.google.com/favicon.ico';let packetsSuccess=0;let packetsLost=0;const latencies=[];for(let i=0;i<totalPackets;i++){progressEl.style.width=((i+1)/totalPackets*100)+'%';const start=performance.now();try{await fetch(testUrl+'?t='+Date.now(),{method:'HEAD',mode:'no-cors',cache:'no-cache'});const end=performance.now();const latency=end-start;latencies.push(latency);packetsSuccess++}catch(error){packetsLost++}await new Promise(resolve=>setTimeout(resolve,100))}const lossPercentage=(packetsLost/totalPackets)*100;let jitter=0;if(latencies.length>1){for(let i=1;i<latencies.length;i++){jitter+=Math.abs(latencies[i]-latencies[i-1])}jitter=jitter/(latencies.length-1)}let stability='Excelente';if(lossPercentage>0||jitter>30)stability='Buena';if(lossPercentage>1||jitter>50)stability='Regular';if(lossPercentage>5||jitter>100)stability='Deficiente';testResults.packetLoss={lossPercentage:lossPercentage,packetsSent:totalPackets,packetsLost:packetsLost,packetsSuccess:packetsSuccess,avgJitter:jitter,stability:stability};document.getElementById('packet-loss-pct').textContent=lossPercentage.toFixed(1);document.getElementById('packets-sent').textContent=totalPackets;document.getElementById('packets-lost').textContent=packetsLost;document.getElementById('packets-success').textContent=packetsSuccess;document.getElementById('avg-jitter').textContent=jitter.toFixed(1)+' ms';document.getElementById('stability-status').textContent=stability;const rating=getRatingForPacketLoss(lossPercentage);const ratingEl=document.getElementById('packetloss-rating');ratingEl.textContent=rating.text;ratingEl.className='result-rating rating-'+rating.class;resultsEl.style.display='block';statusEl.textContent='Completado';statusEl.className='test-status test-success'}
+function getRatingForPacketLoss(lossPercentage){if(lossPercentage===0)return{text:'Excelente',class:'excellent'};if(lossPercentage<1)return{text:'Buena',class:'good'};if(lossPercentage<3)return{text:'Regular',class:'fair'};return{text:'Deficiente',class:'poor'}}
+async function testDownloadSpeed(){const statusEl=document.getElementById('download-status');const progressEl=document.getElementById('download-progress');const resultsEl=document.getElementById('download-results');statusEl.textContent='Ejecutando...';statusEl.className='test-status test-running';const testFiles=['https://via.placeholder.com/1000x1000.jpg','https://via.placeholder.com/1500x1500.jpg','https://via.placeholder.com/2000x2000.jpg'];let totalBytes=0;const startTime=performance.now();for(let i=0;i<testFiles.length;i++){progressEl.style.width=((i+1)/testFiles.length*100)+'%';try{const response=await fetch(testFiles[i]+'?t='+Date.now(),{cache:'no-cache'});const blob=await response.blob();totalBytes+=blob.size}catch(error){console.error(error)}}const endTime=performance.now();const timeSeconds=(endTime-startTime)/1000;const sizeMB=totalBytes/(1024*1024);const speedMbps=(sizeMB*8)/timeSeconds;testResults.download={speedMbps:speedMbps,sizeMB:sizeMB,timeSeconds:timeSeconds};document.getElementById('download-speed').textContent=speedMbps.toFixed(1);document.getElementById('download-size').textContent=sizeMB.toFixed(2);document.getElementById('download-time').textContent=timeSeconds.toFixed(1);const rating=getRatingForSpeed(speedMbps);const ratingEl=document.getElementById('download-rating');ratingEl.textContent=rating.text;ratingEl.className='result-rating rating-'+rating.class;resultsEl.style.display='block';statusEl.textContent='Completado';statusEl.className='test-status test-success'}
+async function testUploadSpeed(){const statusEl=document.getElementById('upload-status');const progressEl=document.getElementById('upload-progress');const resultsEl=document.getElementById('upload-results');statusEl.textContent='Ejecutando...';statusEl.className='test-status test-running';const testDataSize=1024*1024;const testData=new Blob([new Uint8Array(testDataSize)]);const uploadUrl='https://httpbin.org/post';const startTime=performance.now();progressEl.style.width='50%';try{const formData=new FormData();formData.append('file',testData,'test.bin');await fetch(uploadUrl,{method:'POST',body:formData});progressEl.style.width='100%'}catch(error){console.error(error)}const endTime=performance.now();const timeSeconds=(endTime-startTime)/1000;const sizeMB=testDataSize/(1024*1024);const speedMbps=(sizeMB*8)/timeSeconds;testResults.upload={speedMbps:speedMbps,sizeMB:sizeMB,timeSeconds:timeSeconds};document.getElementById('upload-speed').textContent=speedMbps.toFixed(1);document.getElementById('upload-size').textContent=sizeMB.toFixed(2);document.getElementById('upload-time').textContent=timeSeconds.toFixed(1);const rating=getRatingForSpeed(speedMbps);const ratingEl=document.getElementById('upload-rating');ratingEl.textContent=rating.text;ratingEl.className='result-rating rating-'+rating.class;resultsEl.style.display='block';statusEl.textContent='Completado';statusEl.className='test-status test-success'}
+function getRatingForSpeed(speedMbps){if(speedMbps>=50)return{text:'Excelente',class:'excellent'};if(speedMbps>=25)return{text:'Buena',class:'good'};if(speedMbps>=10)return{text:'Regular',class:'fair'};return{text:'Deficiente',class:'poor'}}
+function createLatencyChart(serverResults){const ctx=document.getElementById('latencyChart').getContext('2d');const labels=serverResults.map(s=>s.name);const data=serverResults.map(s=>s.latency>0?s.latency:0);const colors=serverResults.map(s=>{if(s.latency<0)return'#e74c3c';if(s.latency<100)return'#27ae60';if(s.latency<200)return'#f39c12';return'#e74c3c'});new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Latencia (ms)',data:data,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,title:{display:true,text:'Latencia (ms)'}}}}});document.getElementById('chart-card').style.display='block'}
+function showFinalSummary(){const summaryEl=document.getElementById('report-summary');const latencyScore=Math.max(0,100-testResults.latency.avg);const downloadScore=Math.min(100,testResults.download.speedMbps*2);const uploadScore=Math.min(100,testResults.upload.speedMbps*2);const packetLossScore=Math.max(0,100-(testResults.packetLoss.lossPercentage*20));const overallScore=((latencyScore+downloadScore+uploadScore+packetLossScore)/4).toFixed(0);document.getElementById('overall-score').textContent=overallScore+'/100';let grade='Deficiente';if(overallScore>=80)grade='Excelente';else if(overallScore>=60)grade='Buena';else if(overallScore>=40)grade='Regular';document.getElementById('overall-grade').textContent=grade;document.getElementById('final-status').textContent=grade;document.getElementById('final-latency').textContent=testResults.latency.avg.toFixed(0)+' ms';document.getElementById('final-packetloss').textContent=testResults.packetLoss.lossPercentage.toFixed(1)+'%';document.getElementById('final-download').textContent=testResults.download.speedMbps.toFixed(1)+' Mbps';document.getElementById('final-upload').textContent=testResults.upload.speedMbps.toFixed(1)+' Mbps';summaryEl.classList.add('visible');saveToHistory()}
+function saveToHistory(){const history=JSON.parse(localStorage.getItem('networkTestHistory')||'[]');history.push({timestamp:testResults.timestamp,pcName:testResults.pcName,results:testResults});if(history.length>10)history.shift();localStorage.setItem('networkTestHistory',JSON.stringify(history))}
+  </script>
+</body>
+</html>

@@ -79,6 +79,7 @@
 <nav class="top-nav">
   <a href="index.html" class="active">&#128196; Evaluar</a>
   <a href="resultados.html">&#127941; Ver Resultados</a>
+  <a href="editar.html">&#9998;&#65039; Editar Evaluaciones</a>
 </nav>
 <div class="meta-section">
   <div class="meta-group">
@@ -179,6 +180,9 @@
 </div>
 <script>
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpdIOBht2G9En2vuX-SlfhE9AiMzwK7NSi0juK0sARnz-PL1da7Oqvl-SDQKCDU-Q/exec';
+let selections = {};
+let modoEdicion = false;
+let rowIndexEdicion = null;
 const LEVELS = [
   {label:'1-2',name:'Deficiente',value:2},
   {label:'3-4',name:'Basico',value:4},
@@ -322,12 +326,14 @@ async function submitEvaluacion() {
   const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
   const notaFinal=avgTec*0.6+avgFrm*0.4;
   const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
-  showSubmitMsg('sending','⏳ Guardando...');
+  if(modoEdicion && rowIndexEdicion){payload.action='update'; payload.rowIndex=rowIndexEdicion;}
+  showSubmitMsg('sending',modoEdicion?'⏳ Actualizando...':'⏳ Guardando...');
   const btnG=document.getElementById('btn-guardar'); btnG.disabled=true;
   try{
     await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
-    showSubmitMsg('ok','✓ Evaluación guardada correctamente en Google Sheets.');
+    showSubmitMsg('ok',modoEdicion?'✓ Evaluación actualizada correctamente.':'✓ Evaluación guardada correctamente en Google Sheets.');
     btnG.textContent='✓ Guardado';
+    if(modoEdicion) setTimeout(()=>window.location.href='editar.html',2000);
   }catch(err){showSubmitMsg('err','✗ No se pudo conectar. Revisa tu conexión o la URL del script.'); btnG.disabled=false;}
 }
 function showSubmitMsg(type,text){const el=document.getElementById('submit-msg'); el.className='visible '+type; el.textContent=text;}
@@ -347,6 +353,23 @@ function resetForm() {
 buildTable('tbody-tecnico',CRITERIOS_TECNICOS);
 buildTable('tbody-forma',CRITERIOS_FORMA);
 document.getElementById('fecha-eval').valueAsDate=new Date();
+// Detectar modo edición
+const urlParams=new URLSearchParams(window.location.search);
+if(urlParams.get('modo')==='editar' && urlParams.get('rowIndex')){
+  modoEdicion=true;
+  rowIndexEdicion=parseInt(urlParams.get('rowIndex'));
+  const grupo=urlParams.get('grupo')||'';
+  const evaluador=urlParams.get('evaluador')||'';
+  const fecha=urlParams.get('fecha')||'';
+  if(grupo) document.getElementById('nombre-grupo').value=grupo;
+  if(evaluador) document.getElementById('evaluador').value=evaluador;
+  if(fecha) document.getElementById('fecha-eval').value=fecha;
+  document.getElementById('btn-guardar').textContent='💾 Actualizar Evaluación';
+  document.querySelector('header h1').textContent='✏️ Editar Evaluación — Gestión Hídrica';
+  const alertEl=document.getElementById('alert-msg');
+  alertEl.textContent='📝 Modo Edición: Modifica los criterios y presiona "Calcular Nota Final" para actualizar.';
+  alertEl.classList.add('visible');
+}
 </script>
 </body>
 </html>

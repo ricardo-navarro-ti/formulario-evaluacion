@@ -1,0 +1,116 @@
+═══════════════════════════════════════════════════════════════════════════════
+  ⚠️ INSTRUCCIONES: ACTUALIZAR BACKEND EN GOOGLE APPS SCRIPT
+═══════════════════════════════════════════════════════════════════════════════
+
+El código local de "apps-script.js" ya incluye:
+✅ Validación de campos obligatorios (grupo y evaluador)
+✅ Prevención de evaluaciones duplicadas (mismo evaluador + mismo grupo)
+
+PERO estas validaciones SOLO funcionarán después de actualizar Google Apps Script.
+
+═══════════════════════════════════════════════════════════════════════════════
+  📋 PASO A PASO (SIGUE EXACTAMENTE ESTOS PASOS):
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. COPIAR EL CÓDIGO NUEVO                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+En VS Code:
+  → Abre el archivo: apps-script.js
+  → Presiona Ctrl+A (seleccionar todo)
+  → Presiona Ctrl+C (copiar)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 2. ABRIR GOOGLE APPS SCRIPT                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+En Google Sheets:
+  → Abre tu hoja: "Evaluaciones Gestión Hídrica"
+  → Menú superior: Extensiones → Apps Script
+  → Se abrirá una nueva pestaña con el editor
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 3. REEMPLAZAR TODO EL CÓDIGO                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+En el editor de Google Apps Script:
+  → Presiona Ctrl+A (seleccionar todo el código viejo)
+  → Presiona Ctrl+V (pegar el código nuevo)
+  → Verifica que se vea el comentario:
+    "// Verificar si ya existe una evaluación del mismo evaluador..."
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 4. GUARDAR EL CÓDIGO                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  → Presiona Ctrl+S o clic en icono 💾 "Guardar proyecto"
+  → Espera el mensaje: "Guardado"
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 5. CREAR NUEVA VERSIÓN (CRÍTICO - SIN ESTO NO FUNCIONARÁ)                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+⚠️ ESTE ES EL PASO MÁS IMPORTANTE ⚠️
+
+  → Clic en el botón azul "Implementar" (esquina superior derecha)
+  → Selecciona: "Administrar implementaciones"
+  → En la lista, busca tu implementación activa (tiene una ✅)
+  → Clic en el ícono "✏️" (lápiz) al lado derecho
+  → En la sección "Versión": 
+     • Donde dice "Versión" hay un desplegable
+     • Clic en el desplegable
+     • Selecciona: "Nueva versión"
+  → Clic en "Implementar"
+  → Espera a que diga "Implementación actualizada correctamente"
+  → Clic en "Listo" o "Cerrar"
+
+═══════════════════════════════════════════════════════════════════════════════
+  ✅ VERIFICAR QUE FUNCIONE:
+═══════════════════════════════════════════════════════════════════════════════
+
+1️⃣ PRIMERA EVALUACIÓN (debe funcionar):
+   → Selecciona: Grupo "Equipo 1", Evaluador "Luis Soruco"
+   → Completa todos los criterios
+   → Calcula nota
+   → Guarda
+   ✅ Debe guardar correctamente
+
+2️⃣ SEGUNDA EVALUACIÓN DUPLICADA (debe rechazar):
+   → Selecciona: Grupo "Equipo 1", Evaluador "Luis Soruco" (MISMO)
+   → Completa todos los criterios
+   → Calcula nota
+   → Intenta guardar
+   ❌ Debe mostrar: "Ya existe una evaluación de 'Luis Soruco' para 'Equipo 1'."
+
+3️⃣ EVALUACIÓN DIFERENTE (debe funcionar):
+   → Selecciona: Grupo "Equipo 1", Evaluador "OTRO evaluador diferente"
+   → Completa todos los criterios
+   → Guarda
+   ✅ Debe guardar correctamente (es otro evaluador)
+
+═══════════════════════════════════════════════════════════════════════════════
+  🔍 SI NO FUNCIONA, VERIFICA:
+═══════════════════════════════════════════════════════════════════════════════
+
+❌ No creaste "Nueva versión" en el paso 5
+   → El código viejo sigue activo en producción
+   → Solución: Repite el paso 5
+
+❌ Estás usando la URL antigua del Apps Script
+   → Verifica que index.html tenga la URL correcta
+   → La URL debe terminar en "/exec"
+
+❌ El navegador tiene caché
+   → Presiona Ctrl+Shift+R en el formulario para refrescar forzadamente
+
+═══════════════════════════════════════════════════════════════════════════════
+  📊 RESUMEN DE VALIDACIONES ACTIVAS:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Campo "Nombre del Grupo" obligatorio
+✅ Campo "Evaluador/a" obligatorio  
+✅ Prevención de duplicados: Un evaluador NO puede evaluar al mismo grupo 2 veces
+✅ Comparación case-insensitive (ignora mayúsculas/minúsculas)
+
+═══════════════════════════════════════════════════════════════════════════════

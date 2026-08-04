@@ -1,0 +1,149 @@
+═══════════════════════════════════════════════════════════════════════════════
+  ✅ VALIDACIÓN DE DUPLICADOS IMPLEMENTADA EN EL FRONTEND
+═══════════════════════════════════════════════════════════════════════════════
+
+Commit: 502d8d9
+Mensaje: "feat: Validar duplicados en frontend al calcular nota"
+Estado: ✅ Subido a GitHub y desplegándose automáticamente
+
+═══════════════════════════════════════════════════════════════════════════════
+  🎯 ¿QUÉ SE IMPLEMENTÓ?
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Validación TEMPRANA de duplicados
+   • Se ejecuta al presionar "Calcular Nota Final"
+   • Evita que el usuario complete toda la evaluación solo para descubrir al final
+     que ya está duplicada
+
+✅ Doble validación (frontend + backend)
+   • Frontend: Verifica ANTES de calcular la nota
+   • Backend: Verifica ANTES de guardar en Google Sheets
+   • Esto garantiza protección en ambos niveles
+
+═══════════════════════════════════════════════════════════════════════════════
+  🔧 FUNCIONAMIENTO TÉCNICO:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Usuario selecciona grupo y evaluador
+2. Usuario completa todos los criterios
+3. Usuario presiona "Calcular Nota Final"
+4. 🔍 Sistema consulta Google Sheets vía JSONP
+5. 🔎 Compara grupo + evaluador con registros existentes (case-insensitive)
+6. ⚠️ SI YA EXISTE:
+   → Muestra: "Ya existe una evaluación de '[evaluador]' para '[grupo]'."
+   → NO permite calcular la nota
+   → NO habilita el botón "Guardar"
+7. ✅ SI NO EXISTE:
+   → Calcula la nota normalmente
+   → Habilita el botón "Guardar"
+
+═══════════════════════════════════════════════════════════════════════════════
+  📝 CÓDIGO AGREGADO (index.html):
+═══════════════════════════════════════════════════════════════════════════════
+
+Nueva función: verificarDuplicado(grupo, evaluador, callback)
+  • Consulta todos los registros existentes vía JSONP
+  • Compara grupo y evaluador (ignora mayúsculas/minúsculas)
+  • Retorna true si existe duplicado, false si no
+
+Modificación: calcularNota()
+  • Ahora verifica duplicados ANTES de calcular
+  • Muestra mensaje "🔍 Verificando duplicados..." mientras consulta
+  • Si encuentra duplicado: muestra error y termina
+  • Si no encuentra: calcula nota normalmente
+
+═══════════════════════════════════════════════════════════════════════════════
+  ✅ FLUJO COMPLETO DE VALIDACIONES:
+═══════════════════════════════════════════════════════════════════════════════
+
+Al presionar "Calcular Nota Final":
+1️⃣ ¿Grupo seleccionado? → NO: Error "Falta completar el campo 'Nombre del Grupo'"
+2️⃣ ¿Evaluador seleccionado? → NO: Error "Falta completar el campo 'Evaluador/a'"
+3️⃣ ¿Todos los criterios evaluados? → NO: Error "Faltan X criterio(s) por evaluar"
+4️⃣ ¿Ya existe evaluación de este evaluador para este grupo? → SÍ: Error "Ya existe una evaluación..."
+5️⃣ ✅ TODO OK → Calcula nota y habilita botón "Guardar"
+
+Al presionar "Guardar":
+6️⃣ Backend verifica nuevamente (por seguridad)
+7️⃣ ✅ Guarda en Google Sheets
+
+═══════════════════════════════════════════════════════════════════════════════
+  🚀 DESPLIEGUE:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Frontend (index.html):
+   • Ya subido a GitHub (commit 502d8d9)
+   • GitHub Actions desplegando automáticamente (~1-2 minutos)
+   • NO requiere acción manual
+
+✅ Backend (apps-script.js):
+   • Código local actualizado (commit a8f433c)
+   • ⚠️ REQUIERE actualización manual en Google Apps Script
+   • Ver archivo: ACTUALIZAR_GOOGLE_APPS_SCRIPT.txt
+
+═══════════════════════════════════════════════════════════════════════════════
+  🧪 CÓMO PROBAR:
+═══════════════════════════════════════════════════════════════════════════════
+
+Prueba 1: PRIMERA evaluación (debe funcionar)
+  1. Selecciona: Equipo 1, Luis Soruco
+  2. Completa criterios
+  3. Presiona "Calcular Nota Final"
+  4. ✅ Debe calcular correctamente
+  5. Presiona "Guardar"
+  6. ✅ Debe guardar correctamente
+
+Prueba 2: DUPLICADO exacto (debe rechazar)
+  1. Recarga la página
+  2. Selecciona: Equipo 1, Luis Soruco (MISMO)
+  3. Completa criterios
+  4. Presiona "Calcular Nota Final"
+  5. ❌ Debe mostrar: "Ya existe una evaluación de 'Luis Soruco' para 'Equipo 1'."
+  6. ❌ NO debe calcular la nota
+  7. ❌ Botón "Guardar" debe permanecer deshabilitado
+
+Prueba 3: DUPLICADO con mayúsculas diferentes (debe rechazar)
+  1. Recarga la página
+  2. Selecciona: EQUIPO 1 (mayúsculas), LUIS SORUCO (mayúsculas)
+  3. Completa criterios
+  4. Presiona "Calcular Nota Final"
+  5. ❌ Debe mostrar error (la validación ignora mayúsculas)
+
+Prueba 4: Evaluador diferente, mismo grupo (debe funcionar)
+  1. Recarga la página
+  2. Selecciona: Equipo 1, OTRO EVALUADOR diferente
+  3. Completa criterios
+  4. Presiona "Calcular Nota Final"
+  5. ✅ Debe calcular correctamente (es otro evaluador)
+  6. Presiona "Guardar"
+  7. ✅ Debe guardar correctamente
+
+═══════════════════════════════════════════════════════════════════════════════
+  ⏱️ TIEMPOS DE DESPLIEGUE:
+═══════════════════════════════════════════════════════════════════════════════
+
+Frontend (index.html):
+  • Push a GitHub: ✅ Completado
+  • GitHub Actions: ~1-2 minutos
+  • Disponible en: https://ricardo-navarro-ti.github.io/formulario-evaluacion/
+
+Backend (apps-script.js):
+  • Código local: ✅ Actualizado
+  • Google Apps Script: ⚠️ Pendiente (actualización manual)
+  • Después de actualizar: Inmediato
+
+═══════════════════════════════════════════════════════════════════════════════
+  📌 RESUMEN:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Validación de duplicados ahora se hace al calcular nota (no al guardar)
+✅ Usuario recibe retroalimentación inmediata
+✅ Previene completar evaluaciones que serán rechazadas
+✅ Protección doble: frontend (calcular) + backend (guardar)
+✅ Case-insensitive: "Equipo 1" = "equipo 1" = "EQUIPO 1"
+✅ Mensaje claro: "Ya existe una evaluación de '[evaluador]' para '[grupo]'."
+
+⚠️ Espera 1-2 minutos para que GitHub Pages se actualice
+⚠️ Actualiza apps-script.js en Google Apps Script (ver ACTUALIZAR_GOOGLE_APPS_SCRIPT.txt)
+
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,104 @@
+═══════════════════════════════════════════════════════════════════════════════
+  ✅ CAMBIOS APLICADOS Y PUBLICADOS EN GITHUB
+═══════════════════════════════════════════════════════════════════════════════
+
+📅 Commit: 7fb3f26
+📝 Mensaje: "feat: Agregar validaciones campos obligatorios y quitar columna Fecha"
+🔄 Estado: Push exitoso a GitHub
+⏱️ GitHub Actions: Desplegando automáticamente en ~1-2 minutos
+
+═══════════════════════════════════════════════════════════════════════════════
+  ✅ LO QUE YA ESTÁ LISTO:
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ index.html - Validaciones frontend aplicadas
+✓ resultados.html - Columna Fecha eliminada
+✓ Archivos subidos a GitHub (push exitoso)
+✓ GitHub Actions desplegando automáticamente a GitHub Pages
+
+═══════════════════════════════════════════════════════════════════════════════
+  ⚠️ ACCIÓN REQUERIDA: ACTUALIZAR BACKEND EN GOOGLE APPS SCRIPT
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANTE: El archivo "apps-script.js" NO se actualiza automáticamente.
+   Debes copiarlo manualmente a Google Apps Script siguiendo estos pasos:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PASO 1: Abrir Google Apps Script                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. Abre tu Google Sheet de evaluaciones
+2. Menú: Extensiones → Apps Script
+3. Se abrirá el editor de código
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PASO 2: Copiar el nuevo código                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. En VS Code, abre el archivo: apps-script.js
+2. Selecciona TODO el contenido (Ctrl+A)
+3. Copia (Ctrl+C)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PASO 3: Pegar en Google Apps Script                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. En el editor de Google Apps Script, selecciona TODO (Ctrl+A)
+2. Pega el nuevo código (Ctrl+V) - reemplazará todo
+3. Guarda (Ctrl+S o icono 💾)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PASO 4: Crear nueva versión (CRÍTICO)                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+⚠️ SIN ESTE PASO, LOS CAMBIOS NO SE APLICARÁN EN PRODUCCIÓN ⚠️
+
+1. Clic en el botón azul "Implementar" (arriba a la derecha)
+2. Selecciona "Administrar implementaciones"
+3. Clic en el ícono "✏️ Editar" de la implementación activa
+4. En "Versión" selecciona "Nueva versión"
+5. Clic en "Implementar"
+6. Cierra la ventana emergente
+
+═══════════════════════════════════════════════════════════════════════════════
+  🔍 VERIFICAR QUE FUNCIONE:
+═══════════════════════════════════════════════════════════════════════════════
+
+Después de actualizar Google Apps Script:
+
+1. Espera 1-2 minutos para que GitHub Pages se actualice
+2. Abre tu formulario desde GitHub Pages (no desde VS Code)
+3. NO selecciones grupo ni evaluador
+4. Intenta "Calcular Nota"
+   ✅ Debe mostrar: "⚠️ Falta completar el campo 'Nombre del Grupo'."
+
+5. Selecciona un grupo pero NO evaluador
+6. Intenta "Calcular Nota"
+   ✅ Debe mostrar: "⚠️ Falta completar el campo 'Evaluador/a'."
+
+7. Selecciona AMBOS campos y evalúa normalmente
+   ✅ Debe permitir calcular y guardar
+
+═══════════════════════════════════════════════════════════════════════════════
+  📋 RESUMEN DE CAMBIOS:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ FRONTEND (index.html):
+   • calcularNota() valida grupo y evaluador obligatorios
+   • submitEvaluacion() valida antes de enviar al backend
+   • Eliminado fallback "(Sin nombre)"
+   • Mensajes de error específicos por campo
+
+✅ BACKEND (apps-script.js):
+   • doPost() rechaza requests sin grupo válido
+   • doPost() rechaza requests sin evaluador válido
+   • Retorna JSON con error y mensaje específico
+
+✅ RESULTADOS (resultados.html):
+   • Columna "Fecha" eliminada del ranking
+   • Tabla con 6 columnas (era 7)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📌 NOTA: Los cambios de index.html y resultados.html ya están en producción
+         (GitHub Pages). Solo falta actualizar Google Apps Script.
