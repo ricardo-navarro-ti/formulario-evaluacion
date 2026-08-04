@@ -210,7 +210,6 @@ const CRITERIOS_FORMA = [
   {id:'f5',nombre:'Coherencia y estilo',descriptores:['Formato inconsistente.','Variaciones notorias de estilo.','Estilo mayormente consistente.','Estilo uniforme y profesional.','Alto nivel de consistencia y cuidado estético.']},
   {id:'f6',nombre:'Ortografía y redacción',descriptores:['Muchos errores.','Varios errores.','Algunos errores menores.','Redacción correcta, pocos errores.','Redacción impecable.']}
 ];
-const selections = {};
 function buildTable(tbodyId, criterios) {
   const tbody = document.getElementById(tbodyId);
   criterios.forEach(c => {
