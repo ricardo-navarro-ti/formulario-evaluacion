@@ -2,9 +2,13 @@
   ✅ NUEVA FUNCIONALIDAD: EDITAR Y ELIMINAR EVALUACIONES
 ═══════════════════════════════════════════════════════════════════════════════
 
-Commit: f35b39a
-Mensaje: "feat: Agregar funcionalidad para editar y eliminar evaluaciones"
+Último Commit: c25f843
+Mensaje: "feat: Permitir evaluar mismo grupo múltiples veces - eliminar restricción de duplicados"
 Estado: ✅ Subido a GitHub y desplegándose automáticamente
+
+⚠️ CAMBIO IMPORTANTE: Se eliminó la restricción que impedía evaluar al mismo 
+grupo más de una vez. Ahora es posible que múltiples evaluadores evalúen al 
+mismo grupo, o que un evaluador evalúe al mismo grupo varias veces.
 
 ═══════════════════════════════════════════════════════════════════════════════
   📋 ARCHIVOS NUEVOS CREADOS:
