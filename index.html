@@ -244,25 +244,6 @@ function updateLiveTotals() {
   document.getElementById('avg-forma').textContent=fmt(avgFrm);
   document.getElementById('pct-forma').textContent=avgFrm!==null?fmt(avgFrm*0.4):'—';
 }
-function verificarDuplicado(grupo,evaluador,callback){
-  if(APPS_SCRIPT_URL===''){callback(false);return;}
-  const old=document.getElementById('jsonp-check'); if(old) old.remove();
-  window.checkDuplicadoCallback=function(data){
-    const script=document.getElementById('jsonp-check'); if(script) script.remove();
-    delete window.checkDuplicadoCallback;
-    if(!data || data.length===0){callback(false);return;}
-    const existe=data.some(row=>{
-      const g=String(row.Grupo||'').trim().toLowerCase();
-      const e=String(row.Evaluador||'').trim().toLowerCase();
-      return g===grupo.trim().toLowerCase() && e===evaluador.trim().toLowerCase();
-    });
-    callback(existe);
-  };
-  const script=document.createElement('script'); script.id='jsonp-check';
-  script.src=APPS_SCRIPT_URL+'?callback=checkDuplicadoCallback&t='+Date.now();
-  script.onerror=function(){callback(false);};
-  document.body.appendChild(script);
-}
 function calcularNota() {
   const alertEl=document.getElementById('alert-msg');
   const grupo=document.getElementById('nombre-grupo').value;
@@ -281,29 +262,20 @@ function calcularNota() {
     alertEl.textContent='⚠️ Faltan '+missing.length+' criterio(s) por evaluar: '+missing.map(c=>c.nombre).join(' · ')+'.';
     alertEl.classList.add('visible'); alertEl.scrollIntoView({behavior:'smooth',block:'center'}); return;
   }
-  alertEl.textContent='🔍 Verificando duplicados...';
-  alertEl.classList.add('visible'); alertEl.scrollIntoView({behavior:'smooth',block:'center'});
-  verificarDuplicado(grupo,evaluador,function(existe){
-    if(existe){
-      alertEl.textContent='⚠️ Ya existe una evaluación de "'+evaluador+'" para "'+grupo+'".';
-      alertEl.classList.add('visible'); alertEl.scrollIntoView({behavior:'smooth',block:'center'});
-      return;
-    }
-    alertEl.classList.remove('visible');
-    const avgTec=getAvg(CRITERIOS_TECNICOS); const avgFrm=getAvg(CRITERIOS_FORMA);
-    const pctTec=avgTec*0.6; const pctFrm=avgFrm*0.4; const notaFinal=pctTec+pctFrm;
-    document.getElementById('r-avg-tec').textContent=fmt(avgTec);
-    document.getElementById('r-pct-tec').textContent=fmt(pctTec);
-    document.getElementById('r-avg-frm').textContent=fmt(avgFrm);
-    document.getElementById('r-pct-frm').textContent=fmt(pctFrm);
-    document.getElementById('r-final').textContent=notaFinal.toFixed(1);
-    const fecha=document.getElementById('fecha-eval').value;
-    const partes=[]; if(grupo) partes.push('Grupo: '+grupo); if(evaluador) partes.push('Evaluador/a: '+evaluador); if(fecha) partes.push('Fecha: '+fecha);
-    document.getElementById('result-meta').textContent=partes.join('  |  ');
-    const btnG=document.getElementById('btn-guardar'); btnG.disabled=false; btnG.textContent='💾 Guardar en Google Sheets';
-    const msgEl=document.getElementById('submit-msg'); msgEl.className=''; msgEl.textContent='';
-    const resultsEl=document.getElementById('results'); resultsEl.classList.add('visible'); resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
-  });
+  alertEl.classList.remove('visible');
+  const avgTec=getAvg(CRITERIOS_TECNICOS); const avgFrm=getAvg(CRITERIOS_FORMA);
+  const pctTec=avgTec*0.6; const pctFrm=avgFrm*0.4; const notaFinal=pctTec+pctFrm;
+  document.getElementById('r-avg-tec').textContent=fmt(avgTec);
+  document.getElementById('r-pct-tec').textContent=fmt(pctTec);
+  document.getElementById('r-avg-frm').textContent=fmt(avgFrm);
+  document.getElementById('r-pct-frm').textContent=fmt(pctFrm);
+  document.getElementById('r-final').textContent=notaFinal.toFixed(1);
+  const fecha=document.getElementById('fecha-eval').value;
+  const partes=[]; if(grupo) partes.push('Grupo: '+grupo); if(evaluador) partes.push('Evaluador/a: '+evaluador); if(fecha) partes.push('Fecha: '+fecha);
+  document.getElementById('result-meta').textContent=partes.join('  |  ');
+  const btnG=document.getElementById('btn-guardar'); btnG.disabled=false; btnG.textContent='💾 Guardar en Google Sheets';
+  const msgEl=document.getElementById('submit-msg'); msgEl.className=''; msgEl.textContent='';
+  const resultsEl=document.getElementById('results'); resultsEl.classList.add('visible'); resultsEl.scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function submitEvaluacion() {
   if(APPS_SCRIPT_URL===''){showSubmitMsg('err','⚠️ Configura primero la URL del Apps Script (ver GUIA-PUBLICACION.md).'); return;}

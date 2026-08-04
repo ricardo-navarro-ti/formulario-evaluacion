@@ -66,27 +66,6 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // Verificar duplicados solo al crear (no al actualizar)
-    const lastRow = sheet.getLastRow();
-    if (lastRow > 1) {
-      const dataRange = sheet.getRange(2, 1, lastRow - 1, HEADERS.length);
-      const values = dataRange.getValues();
-      for (let i = 0; i < values.length; i++) {
-        const row = values[i];
-        const grupoExistente = String(row[1]).trim();
-        const evaluadorExistente = String(row[2]).trim();
-        if (grupoExistente.toLowerCase() === data.grupo.trim().toLowerCase() && 
-            evaluadorExistente.toLowerCase() === data.evaluador.trim().toLowerCase()) {
-          return ContentService
-            .createTextOutput(JSON.stringify({ 
-              status: 'error', 
-              message: 'Ya existe una evaluación de "' + data.evaluador + '" para "' + data.grupo + '".' 
-            }))
-            .setMimeType(ContentService.MimeType.JSON);
-        }
-      }
-    }
-    
     sheet.appendRow([
       new Date().toLocaleString('es-CL'),
       data.grupo, data.evaluador, data.fecha,
