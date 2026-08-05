@@ -40,17 +40,47 @@ function doPost(e) {
     }
     
     // Acción: Actualizar
-    if (data.action === 'update' && data.rowIndex) {
-      sheet.getRange(data.rowIndex, 1, 1, HEADERS.length).setValues([[
-        new Date().toLocaleString('es-CL'),
-        data.grupo, data.evaluador, data.fecha,
-        ...data.tecnico,
-        ...data.forma,
-        data.avgTecnico, data.avgForma, data.notaFinal
-      ]]);
-      return ContentService
-        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación actualizada.' }))
-        .setMimeType(ContentService.MimeType.JSON);
+    if (data.action === 'update') {
+      // Buscar la fila que coincida con grupo+evaluador
+      const lastRow = sheet.getLastRow();
+      let targetRow = null;
+      
+      if (lastRow > 1) {
+        const dataRange = sheet.getRange(2, 1, lastRow - 1, HEADERS.length);
+        const values = dataRange.getValues();
+        for (let i = 0; i < values.length; i++) {
+          const row = values[i];
+          const grupoExistente = String(row[1]).trim().toLowerCase();
+          const evaluadorExistente = String(row[2]).trim().toLowerCase();
+          if (grupoExistente === data.grupo.trim().toLowerCase() && 
+              evaluadorExistente === data.evaluador.trim().toLowerCase()) {
+            targetRow = i + 2; // +2 porque fila 1 es header y el array empieza en 0
+            break;
+          }
+        }
+      }
+      
+      // Si no se encontró por grupo+evaluador, usar rowIndex si existe
+      if (!targetRow && data.rowIndex) {
+        targetRow = data.rowIndex;
+      }
+      
+      if (targetRow) {
+        sheet.getRange(targetRow, 1, 1, HEADERS.length).setValues([[
+          new Date().toLocaleString('es-CL'),
+          data.grupo, data.evaluador, data.fecha,
+          ...data.tecnico,
+          ...data.forma,
+          data.avgTecnico, data.avgForma, data.notaFinal
+        ]]);
+        return ContentService
+          .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación actualizada.' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService
+          .createTextOutput(JSON.stringify({ status: 'error', message: 'No se encontró la evaluación a actualizar.' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
     }
     
     // Acción: Crear (por defecto)

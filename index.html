@@ -292,7 +292,33 @@ async function submitEvaluacion() {
   const allCriterios=[...CRITERIOS_TECNICOS,...CRITERIOS_FORMA];
   if(allCriterios.some(c=>selections[c.id]===undefined)){showSubmitMsg('err','⚠️ Calcula la nota antes de guardar.'); return;}
   
-  // Buscar si ya existe evaluación de este evaluador para este grupo
+  // Preparar payload base
+  const tecnicoScores=CRITERIOS_TECNICOS.map(c=>LEVELS[selections[c.id]].value);
+  const formaScores=CRITERIOS_FORMA.map(c=>LEVELS[selections[c.id]].value);
+  const avgTec=tecnicoScores.reduce((a,b)=>a+b,0)/tecnicoScores.length;
+  const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
+  const notaFinal=avgTec*0.6+avgFrm*0.4;
+  const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
+  
+  // Si estamos en modo edición, usar directamente el rowIndex que viene de la URL
+  if(modoEdicion && rowIndexEdicion) {
+    payload.action = 'update';
+    payload.rowIndex = rowIndexEdicion;
+    showSubmitMsg('sending','⏳ Actualizando evaluación...');
+    const btnG=document.getElementById('btn-guardar'); btnG.disabled=true;
+    try {
+      await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
+      showSubmitMsg('ok','✓ Evaluación actualizada correctamente.');
+      btnG.textContent='✓ Guardado';
+      setTimeout(()=>window.location.href='editar.html',2000);
+    } catch(err) {
+      showSubmitMsg('err','✗ No se pudo conectar. Revisa tu conexión o la URL del script.');
+      btnG.disabled=false;
+    }
+    return;
+  }
+  
+  // Si NO estamos en modo edición, buscar si ya existe evaluación de este evaluador para este grupo
   showSubmitMsg('sending','🔍 Verificando evaluaciones existentes...');
   const old=document.getElementById('jsonp-check-submit'); if(old) old.remove();
   
@@ -314,18 +340,10 @@ async function submitEvaluacion() {
         }
       }
       
-      // Preparar payload
-      const tecnicoScores=CRITERIOS_TECNICOS.map(c=>LEVELS[selections[c.id]].value);
-      const formaScores=CRITERIOS_FORMA.map(c=>LEVELS[selections[c.id]].value);
-      const avgTec=tecnicoScores.reduce((a,b)=>a+b,0)/tecnicoScores.length;
-      const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
-      const notaFinal=avgTec*0.6+avgFrm*0.4;
-      const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
-      
-      // Si existe evaluación previa O estamos en modo edición, actualizar
-      if(rowIndexExistente || (modoEdicion && rowIndexEdicion)) {
+      // Si existe evaluación previa, actualizar
+      if(rowIndexExistente) {
         payload.action = 'update';
-        payload.rowIndex = rowIndexExistente || rowIndexEdicion;
+        payload.rowIndex = rowIndexExistente;
         showSubmitMsg('sending','⏳ Actualizando evaluación existente...');
       } else {
         showSubmitMsg('sending','⏳ Guardando nueva evaluación...');
@@ -336,7 +354,7 @@ async function submitEvaluacion() {
         .then(() => {
           showSubmitMsg('ok',rowIndexExistente?'✓ Evaluación actualizada correctamente.':'✓ Evaluación guardada correctamente en Google Sheets.');
           btnG.textContent='✓ Guardado';
-          if(modoEdicion || rowIndexExistente) setTimeout(()=>window.location.href='editar.html',2000);
+          if(rowIndexExistente) setTimeout(()=>window.location.href='editar.html',2000);
         })
         .catch(err => {
           showSubmitMsg('err','✗ No se pudo conectar. Revisa tu conexión o la URL del script.');
