@@ -31,84 +31,7 @@ function doPost(e) {
     }
     const data = JSON.parse(e.postData.contents);
     
-    // Acción: Eliminar
-    if (data.action === 'delete') {
-      // Buscar la fila que coincida con grupo+evaluador
-      const lastRow = sheet.getLastRow();
-      let targetRow = null;
-      
-      if (lastRow > 1) {
-        const dataRange = sheet.getRange(2, 1, lastRow - 1, HEADERS.length);
-        const values = dataRange.getValues();
-        for (let i = 0; i < values.length; i++) {
-          const row = values[i];
-          const grupoExistente = String(row[1]).trim().toLowerCase();
-          const evaluadorExistente = String(row[2]).trim().toLowerCase();
-          if (grupoExistente === data.grupo.trim().toLowerCase() && 
-              evaluadorExistente === data.evaluador.trim().toLowerCase()) {
-            targetRow = i + 2;
-            break;
-          }
-        }
-      }
-      
-      if (targetRow) {
-        sheet.deleteRow(targetRow);
-        return ContentService
-          .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación eliminada.' }))
-          .setMimeType(ContentService.MimeType.JSON);
-      } else {
-        return ContentService
-          .createTextOutput(JSON.stringify({ status: 'error', message: 'No se encontró la evaluación a eliminar.' }))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
-    }
-    
-    // Acción: Actualizar
-    if (data.action === 'update') {
-      // Buscar la fila que coincida con grupo+evaluador
-      const lastRow = sheet.getLastRow();
-      let targetRow = null;
-      
-      if (lastRow > 1) {
-        const dataRange = sheet.getRange(2, 1, lastRow - 1, HEADERS.length);
-        const values = dataRange.getValues();
-        for (let i = 0; i < values.length; i++) {
-          const row = values[i];
-          const grupoExistente = String(row[1]).trim().toLowerCase();
-          const evaluadorExistente = String(row[2]).trim().toLowerCase();
-          if (grupoExistente === data.grupo.trim().toLowerCase() && 
-              evaluadorExistente === data.evaluador.trim().toLowerCase()) {
-            targetRow = i + 2; // +2 porque fila 1 es header y el array empieza en 0
-            break;
-          }
-        }
-      }
-      
-      // Si no se encontró por grupo+evaluador, usar rowIndex si existe
-      if (!targetRow && data.rowIndex) {
-        targetRow = data.rowIndex;
-      }
-      
-      if (targetRow) {
-        sheet.getRange(targetRow, 1, 1, HEADERS.length).setValues([[
-          new Date().toLocaleString('es-CL'),
-          data.grupo, data.evaluador,
-          ...data.tecnico,
-          ...data.forma,
-          data.avgTecnico, data.avgForma, data.notaFinal
-        ]]);
-        return ContentService
-          .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación actualizada.' }))
-          .setMimeType(ContentService.MimeType.JSON);
-      } else {
-        return ContentService
-          .createTextOutput(JSON.stringify({ status: 'error', message: 'No se encontró la evaluación a actualizar.' }))
-          .setMimeType(ContentService.MimeType.JSON);
-      }
-    }
-    
-    // Acción: Crear (por defecto)
+    // VALIDACIONES
     if (!data.grupo || data.grupo.trim() === '' || data.grupo.includes('Selecciona')) {
       return ContentService
         .createTextOutput(JSON.stringify({ status: 'error', message: 'Falta completar el campo "Nombre del Grupo".' }))
@@ -121,48 +44,50 @@ function doPost(e) {
         .setMimeType(ContentService.MimeType.JSON);
     }
     
-    // Verificar si ya existe evaluación de este evaluador para este grupo
+    // SIEMPRE buscar si ya existe evaluación de este evaluador para este grupo
     const lastRow = sheet.getLastRow();
     let existingRow = null;
     
     if (lastRow > 1) {
-      const dataRange = sheet.getRange(2, 1, lastRow - 1, HEADERS.length);
-      const values = dataRange.getValues();
-      for (let i = 0; i < values.length; i++) {
-        const row = values[i];
-        const grupoExistente = String(row[1]).trim().toLowerCase();
-        const evaluadorExistente = String(row[2]).trim().toLowerCase();
-        if (grupoExistente === data.grupo.trim().toLowerCase() && 
-            evaluadorExistente === data.evaluador.trim().toLowerCase()) {
+      // Leer SOLO las primeras 3 columnas para buscar más rápido
+      const searchRange = sheet.getRange(2, 1, lastRow - 1, 3);
+      const searchValues = searchRange.getValues();
+      
+      const grupoLower = data.grupo.trim().toLowerCase();
+      const evaluadorLower = data.evaluador.trim().toLowerCase();
+      
+      for (let i = 0; i < searchValues.length; i++) {
+        const row = searchValues[i];
+        const grupoExistente = String(row[1] || '').trim().toLowerCase();
+        const evaluadorExistente = String(row[2] || '').trim().toLowerCase();
+        
+        if (grupoExistente === grupoLower && evaluadorExistente === evaluadorLower) {
           existingRow = i + 2; // +2 porque fila 1 es header y el array empieza en 0
           break;
         }
       }
     }
     
-    // Si existe, actualizar; si no existe, crear
-    if (existingRow) {
-      sheet.getRange(existingRow, 1, 1, HEADERS.length).setValues([[
-        new Date().toLocaleString('es-CL'),
-        data.grupo, data.evaluador,
-        ...data.tecnico,
-        ...data.forma,
-        data.avgTecnico, data.avgForma, data.notaFinal
-      ]]);
-      return ContentService
-        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación actualizada.' }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    sheet.appendRow([
+    const rowData = [
       new Date().toLocaleString('es-CL'),
       data.grupo, data.evaluador,
       ...data.tecnico,
       ...data.forma,
       data.avgTecnico, data.avgForma, data.notaFinal
-    ]);
+    ];
+    
+    // Si existe, ACTUALIZAR en lugar de crear
+    if (existingRow) {
+      sheet.getRange(existingRow, 1, 1, HEADERS.length).setValues([rowData]);
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación actualizada.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // Si NO existe, crear nuevo registro
+    sheet.appendRow(rowData);
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación creada.' }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService
