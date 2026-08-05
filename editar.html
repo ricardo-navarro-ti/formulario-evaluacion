@@ -89,29 +89,15 @@ function renderTable() {
   evaluaciones.forEach((ev,idx)=>{
     const notaClass=ev.notaFinal>=6.5?'nota-hi':ev.notaFinal>=5.5?'nota-ok':ev.notaFinal>=4.5?'nota-mid':'nota-low';
     const tr=document.createElement('tr');
-    tr.innerHTML='<td>'+(idx+1)+'</td><td><strong>'+esc(ev.grupo)+'</strong></td><td>'+esc(ev.evaluador)+'</td><td style="text-align:center"><span class="nota-chip '+notaClass+'">'+ev.notaFinal.toFixed(1)+'</span></td><td style="text-align:center"><button class="btn btn-edit" onclick="editarEval('+idx+')">✏️ Editar</button><button class="btn btn-delete" onclick="confirmarEliminar('+idx+')">🗑️ Eliminar</button></td>';
+    tr.innerHTML='<td>'+(idx+1)+'</td><td><strong>'+esc(ev.grupo)+'</strong></td><td>'+esc(ev.evaluador)+'</td><td style="text-align:center"><span class="nota-chip '+notaClass+'">'+ev.notaFinal.toFixed(1)+'</span></td><td style="text-align:center"><button class="btn btn-edit" onclick="editarEval('+idx+')">✏️ Editar</button></td>';
     tbody.appendChild(tr);
   });
   document.getElementById('eval-table').classList.add('visible');
 }
 function editarEval(idx) {
   const ev=evaluaciones[idx];
-  const params=new URLSearchParams({rowIndex:ev.rowIndex,grupo:ev.grupo,evaluador:ev.evaluador,modo:'editar'});
+  const params=new URLSearchParams({grupo:ev.grupo,evaluador:ev.evaluador,modo:'editar'});
   window.location.href='index.html?'+params.toString();
-}
-function confirmarEliminar(idx) {
-  const ev=evaluaciones[idx];
-  if(!confirm('¿Eliminar la evaluación de "'+ev.evaluador+'" para "'+ev.grupo+'"?')) return;
-  eliminarEval(idx);
-}
-async function eliminarEval(idx) {
-  const ev=evaluaciones[idx];
-  showAlert('info','🗑️ Eliminando...');
-  try{
-    const resp=await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'delete',grupo:ev.grupo,evaluador:ev.evaluador})});
-    showAlert('success','✓ Evaluación eliminada correctamente.');
-    setTimeout(()=>location.reload(),1500);
-  }catch(err){showAlert('error','✗ No se pudo eliminar. Intenta nuevamente.');}
 }
 function showAlert(type,text){const el=document.getElementById('alert-msg'); el.className='alert visible '+type; el.textContent=text; window.scrollTo(0,0);}
 function setLoading(on){document.getElementById('loading').classList.toggle('visible',on);}
