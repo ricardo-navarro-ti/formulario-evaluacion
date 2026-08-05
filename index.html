@@ -100,7 +100,7 @@
       <option value="">-- Selecciona un evaluador --</option>
       <option value="Luis Soruco">Luis Soruco</option>
       <option value="Vilma Pérez">Vilma Pérez</option>
-      <option value="Carolina Soto">Carolina Soto</option>
+      <option value="Milena Calvo">Milena Calvo</option>
       <option value="David Hernández">David Hernández</option>
       <option value="Álvaro Arroyo">Álvaro Arroyo</option>
       <option value="Felipe Morales Rivera">Felipe Morales Rivera</option>
@@ -109,10 +109,6 @@
       <option value="Mauricio Trigo">Mauricio Trigo</option>
       <option value="David Molina">David Molina</option>
     </select>
-  </div>
-  <div class="meta-group">
-    <label for="fecha-eval">Fecha de evaluación</label>
-    <input type="date" id="fecha-eval" />
   </div>
 </div>
 <div class="alert" id="alert-msg"></div>
@@ -270,8 +266,7 @@ function calcularNota() {
   document.getElementById('r-avg-frm').textContent=fmt(avgFrm);
   document.getElementById('r-pct-frm').textContent=fmt(pctFrm);
   document.getElementById('r-final').textContent=notaFinal.toFixed(1);
-  const fecha=document.getElementById('fecha-eval').value;
-  const partes=[]; if(grupo) partes.push('Grupo: '+grupo); if(evaluador) partes.push('Evaluador/a: '+evaluador); if(fecha) partes.push('Fecha: '+fecha);
+    const partes=[]; if(grupo) partes.push('Grupo: '+grupo); if(evaluador) partes.push('Evaluador/a: '+evaluador);
   document.getElementById('result-meta').textContent=partes.join('  |  ');
   const btnG=document.getElementById('btn-guardar'); btnG.disabled=false; btnG.textContent='💾 Guardar en Google Sheets';
   const msgEl=document.getElementById('submit-msg'); msgEl.className=''; msgEl.textContent='';
@@ -298,7 +293,7 @@ async function submitEvaluacion() {
   const avgTec=tecnicoScores.reduce((a,b)=>a+b,0)/tecnicoScores.length;
   const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
   const notaFinal=avgTec*0.6+avgFrm*0.4;
-  const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
+  const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
   
   // Si estamos en modo edición, usar directamente el rowIndex que viene de la URL
   if(modoEdicion && rowIndexEdicion) {
@@ -381,7 +376,6 @@ function resetForm() {
   ['avg-tecnico','pct-tecnico','avg-forma','pct-forma'].forEach(id=>document.getElementById(id).textContent='—');
   ['r-avg-tec','r-pct-tec','r-avg-frm','r-pct-frm','r-final'].forEach(id=>document.getElementById(id).textContent='—');
   document.getElementById('nombre-grupo').selectedIndex=0; document.getElementById('evaluador').selectedIndex=0;
-  document.getElementById('fecha-eval').valueAsDate=new Date();
   document.getElementById('results').classList.remove('visible');
   document.getElementById('alert-msg').classList.remove('visible');
   const btnG=document.getElementById('btn-guardar'); btnG.disabled=false; btnG.textContent='💾 Guardar en Google Sheets';
@@ -389,7 +383,6 @@ function resetForm() {
 }
 buildTable('tbody-tecnico',CRITERIOS_TECNICOS);
 buildTable('tbody-forma',CRITERIOS_FORMA);
-document.getElementById('fecha-eval').valueAsDate=new Date();
 // Detectar modo edición
 const urlParams=new URLSearchParams(window.location.search);
 if(urlParams.get('modo')==='editar' && urlParams.get('rowIndex')){
@@ -397,10 +390,8 @@ if(urlParams.get('modo')==='editar' && urlParams.get('rowIndex')){
   rowIndexEdicion=parseInt(urlParams.get('rowIndex'));
   const grupo=urlParams.get('grupo')||'';
   const evaluador=urlParams.get('evaluador')||'';
-  const fecha=urlParams.get('fecha')||'';
   if(grupo) document.getElementById('nombre-grupo').value=grupo;
   if(evaluador) document.getElementById('evaluador').value=evaluador;
-  if(fecha) document.getElementById('fecha-eval').value=fecha;
   document.getElementById('btn-guardar').textContent='💾 Actualizar Evaluación';
   document.querySelector('header h1').textContent='✏️ Editar Evaluación — Gestión Hídrica';
   const alertEl=document.getElementById('alert-msg');

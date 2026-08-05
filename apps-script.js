@@ -12,7 +12,7 @@
 // ============================================================
 
 const HEADERS = [
-  'Timestamp', 'Grupo', 'Evaluador', 'Fecha',
+  'Timestamp', 'Grupo', 'Evaluador',
   'T1_Entorno', 'T2_Actores', 'T3_FactoresEntrada', 'T4_FactoresPerdida',
   'T5_Medidas', 'T6_EquidadSocial', 'T7_Sostenibilidad', 'T8_BeneficioEcon',
   'T9_Coherencia', 'T10_Prompts',
@@ -32,11 +32,36 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     
     // Acción: Eliminar
-    if (data.action === 'delete' && data.rowIndex) {
-      sheet.deleteRow(data.rowIndex);
-      return ContentService
-        .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación eliminada.' }))
-        .setMimeType(ContentService.MimeType.JSON);
+    if (data.action === 'delete') {
+      // Buscar la fila que coincida con grupo+evaluador
+      const lastRow = sheet.getLastRow();
+      let targetRow = null;
+      
+      if (lastRow > 1) {
+        const dataRange = sheet.getRange(2, 1, lastRow - 1, HEADERS.length);
+        const values = dataRange.getValues();
+        for (let i = 0; i < values.length; i++) {
+          const row = values[i];
+          const grupoExistente = String(row[1]).trim().toLowerCase();
+          const evaluadorExistente = String(row[2]).trim().toLowerCase();
+          if (grupoExistente === data.grupo.trim().toLowerCase() && 
+              evaluadorExistente === data.evaluador.trim().toLowerCase()) {
+            targetRow = i + 2;
+            break;
+          }
+        }
+      }
+      
+      if (targetRow) {
+        sheet.deleteRow(targetRow);
+        return ContentService
+          .createTextOutput(JSON.stringify({ status: 'ok', message: 'Evaluación eliminada.' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } else {
+        return ContentService
+          .createTextOutput(JSON.stringify({ status: 'error', message: 'No se encontró la evaluación a eliminar.' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
     }
     
     // Acción: Actualizar
@@ -68,7 +93,7 @@ function doPost(e) {
       if (targetRow) {
         sheet.getRange(targetRow, 1, 1, HEADERS.length).setValues([[
           new Date().toLocaleString('es-CL'),
-          data.grupo, data.evaluador, data.fecha,
+          data.grupo, data.evaluador,
           ...data.tecnico,
           ...data.forma,
           data.avgTecnico, data.avgForma, data.notaFinal
@@ -119,7 +144,7 @@ function doPost(e) {
     if (existingRow) {
       sheet.getRange(existingRow, 1, 1, HEADERS.length).setValues([[
         new Date().toLocaleString('es-CL'),
-        data.grupo, data.evaluador, data.fecha,
+        data.grupo, data.evaluador,
         ...data.tecnico,
         ...data.forma,
         data.avgTecnico, data.avgForma, data.notaFinal
@@ -131,7 +156,7 @@ function doPost(e) {
     
     sheet.appendRow([
       new Date().toLocaleString('es-CL'),
-      data.grupo, data.evaluador, data.fecha,
+      data.grupo, data.evaluador,
       ...data.tecnico,
       ...data.forma,
       data.avgTecnico, data.avgForma, data.notaFinal
