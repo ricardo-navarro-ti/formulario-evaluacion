@@ -291,21 +291,69 @@ async function submitEvaluacion() {
   }
   const allCriterios=[...CRITERIOS_TECNICOS,...CRITERIOS_FORMA];
   if(allCriterios.some(c=>selections[c.id]===undefined)){showSubmitMsg('err','⚠️ Calcula la nota antes de guardar.'); return;}
-  const tecnicoScores=CRITERIOS_TECNICOS.map(c=>LEVELS[selections[c.id]].value);
-  const formaScores=CRITERIOS_FORMA.map(c=>LEVELS[selections[c.id]].value);
-  const avgTec=tecnicoScores.reduce((a,b)=>a+b,0)/tecnicoScores.length;
-  const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
-  const notaFinal=avgTec*0.6+avgFrm*0.4;
-  const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
-  if(modoEdicion && rowIndexEdicion){payload.action='update'; payload.rowIndex=rowIndexEdicion;}
-  showSubmitMsg('sending',modoEdicion?'⏳ Actualizando...':'⏳ Guardando...');
-  const btnG=document.getElementById('btn-guardar'); btnG.disabled=true;
-  try{
-    await fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
-    showSubmitMsg('ok',modoEdicion?'✓ Evaluación actualizada correctamente.':'✓ Evaluación guardada correctamente en Google Sheets.');
-    btnG.textContent='✓ Guardado';
-    if(modoEdicion) setTimeout(()=>window.location.href='editar.html',2000);
-  }catch(err){showSubmitMsg('err','✗ No se pudo conectar. Revisa tu conexión o la URL del script.'); btnG.disabled=false;}
+  
+  // Buscar si ya existe evaluación de este evaluador para este grupo
+  showSubmitMsg('sending','🔍 Verificando evaluaciones existentes...');
+  const old=document.getElementById('jsonp-check-submit'); if(old) old.remove();
+  
+  await new Promise((resolve) => {
+    window.checkSubmitCallback=function(data){
+      const script=document.getElementById('jsonp-check-submit'); if(script) script.remove();
+      delete window.checkSubmitCallback;
+      
+      let rowIndexExistente = null;
+      if(data && data.length > 0) {
+        for(let i=0; i<data.length; i++) {
+          const row = data[i];
+          const g = String(row.Grupo||'').trim().toLowerCase();
+          const e = String(row.Evaluador||'').trim().toLowerCase();
+          if(g === grupo.trim().toLowerCase() && e === evaluador.trim().toLowerCase()) {
+            rowIndexExistente = i + 2; // +2 porque fila 1 es header
+            break;
+          }
+        }
+      }
+      
+      // Preparar payload
+      const tecnicoScores=CRITERIOS_TECNICOS.map(c=>LEVELS[selections[c.id]].value);
+      const formaScores=CRITERIOS_FORMA.map(c=>LEVELS[selections[c.id]].value);
+      const avgTec=tecnicoScores.reduce((a,b)=>a+b,0)/tecnicoScores.length;
+      const avgFrm=formaScores.reduce((a,b)=>a+b,0)/formaScores.length;
+      const notaFinal=avgTec*0.6+avgFrm*0.4;
+      const payload={grupo:grupo.trim(),evaluador:evaluador.trim(),fecha:document.getElementById('fecha-eval').value,tecnico:tecnicoScores,forma:formaScores,avgTecnico:parseFloat(avgTec.toFixed(2)),avgForma:parseFloat(avgFrm.toFixed(2)),notaFinal:parseFloat(notaFinal.toFixed(2))};
+      
+      // Si existe evaluación previa O estamos en modo edición, actualizar
+      if(rowIndexExistente || (modoEdicion && rowIndexEdicion)) {
+        payload.action = 'update';
+        payload.rowIndex = rowIndexExistente || rowIndexEdicion;
+        showSubmitMsg('sending','⏳ Actualizando evaluación existente...');
+      } else {
+        showSubmitMsg('sending','⏳ Guardando nueva evaluación...');
+      }
+      
+      const btnG=document.getElementById('btn-guardar'); btnG.disabled=true;
+      fetch(APPS_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)})
+        .then(() => {
+          showSubmitMsg('ok',rowIndexExistente?'✓ Evaluación actualizada correctamente.':'✓ Evaluación guardada correctamente en Google Sheets.');
+          btnG.textContent='✓ Guardado';
+          if(modoEdicion || rowIndexExistente) setTimeout(()=>window.location.href='editar.html',2000);
+        })
+        .catch(err => {
+          showSubmitMsg('err','✗ No se pudo conectar. Revisa tu conexión o la URL del script.');
+          btnG.disabled=false;
+        });
+      
+      resolve();
+    };
+    
+    const script=document.createElement('script'); script.id='jsonp-check-submit';
+    script.src=APPS_SCRIPT_URL+'?callback=checkSubmitCallback&t='+Date.now();
+    script.onerror=function(){
+      showSubmitMsg('err','✗ No se pudo verificar evaluaciones existentes.');
+      resolve();
+    };
+    document.body.appendChild(script);
+  });
 }
 function showSubmitMsg(type,text){const el=document.getElementById('submit-msg'); el.className='visible '+type; el.textContent=text;}
 function resetForm() {
